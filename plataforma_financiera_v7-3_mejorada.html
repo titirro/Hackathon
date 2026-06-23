@@ -1,0 +1,2150 @@
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root {
+  /* Brand palette – warm indigo + teal accent */
+  --brand:        #5048C8;
+  --brand-light:  #EAE9FF;
+  --brand-mid:    #7B74E0;
+  --teal:         #17A97A;
+  --teal-light:   #DFF6EE;
+  --amber:        #F0A030;
+  --amber-light:  #FEF3DC;
+  --red:          #D95030;
+  --red-light:    #FEECE8;
+
+  /* Neutral scale */
+  --bg:           #F6F5FA;
+  --surface:      #FFFFFF;
+  --surface2:     #F0EFF8;
+  --border:       #E3E1F5;
+  --border2:      #CECDEA;
+  --text-primary: #1A1830;
+  --text-secondary:#6B6890;
+  --text-tertiary:#A09DC0;
+
+  /* CSS vars expected by the app */
+  --color-background-primary:   var(--surface);
+  --color-background-secondary: var(--surface2);
+  --color-text-primary:         var(--text-primary);
+  --color-text-secondary:       var(--text-secondary);
+  --color-border-secondary:     var(--border2);
+  --color-border-tertiary:      var(--border);
+}
+
+/* Global body wrapper */
+body {
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+/* ── App shell ── */
+.app {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  overflow: hidden;
+  max-width: 390px;
+  margin: 0 auto;
+  box-shadow: 0 20px 60px rgba(80,72,200,0.12), 0 4px 16px rgba(0,0,0,0.06);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+.screen { display: none; flex-direction: column; min-height: 600px; }
+.screen.active { display: flex; }
+
+/* ── Status bar ── */
+.status-bar {
+  background: var(--brand);
+  padding: 9px 18px 7px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+.status-bar span { font-size: 11px; color: rgba(255,255,255,0.88); font-weight: 500; letter-spacing: 0.02em; }
+
+/* ── App header ── */
+.app-header {
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  background: var(--surface);
+}
+.app-header h2 { font-size: 16px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.02em; }
+.app-header p  { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+
+/* ── Screen body ── */
+.screen-body { padding: 16px 18px; flex: 1; overflow-y: auto; }
+
+/* ── Bottom nav ── */
+.nav {
+  display: flex;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+  background: var(--surface);
+  padding-bottom: 4px;
+}
+.nav-tab {
+  flex: 1;
+  padding: 10px 4px 8px;
+  text-align: center;
+  font-size: 10px;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  border: none;
+  background: none;
+  transition: color 0.15s;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+}
+.nav-tab.active {
+  color: var(--brand);
+  border-top: 2.5px solid var(--brand);
+  margin-top: -1px;
+  padding-top: 9px;
+}
+.nav-tab i { display: block; font-size: 19px; margin-bottom: 3px; }
+
+/* ── Score ring ── */
+.score-ring {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: linear-gradient(135deg, var(--brand-light), #F0F0FF);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 14px;
+  border: 1px solid var(--border);
+}
+.ring {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 3.5px solid var(--teal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--teal);
+  background: var(--surface);
+  box-shadow: 0 2px 8px rgba(23,169,122,0.18);
+}
+
+/* ── Stat grid ── */
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.stat-card {
+  background: var(--surface2);
+  border-radius: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+}
+.stat-card .lbl { font-size: 11px; color: var(--text-secondary); font-weight: 500; }
+.stat-card .val { font-size: 17px; font-weight: 700; margin-top: 3px; }
+.val.up { color: var(--teal); }
+.val.dn { color: var(--red); }
+
+/* ── Section title ── */
+.sec-title {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 10px;
+}
+
+/* ── Bar chart ── */
+.bar-chart { display: flex; align-items: flex-end; gap: 6px; height: 72px; margin-bottom: 6px; }
+.bar {
+  flex: 1;
+  border-radius: 5px 5px 0 0;
+  transition: opacity 0.2s, transform 0.15s;
+  cursor: pointer;
+}
+.bar:hover { opacity: 0.75; transform: scaleY(1.03); transform-origin: bottom; }
+.bar-labels { display: flex; gap: 6px; }
+.bar-lbl { flex: 1; text-align: center; font-size: 10px; color: var(--text-tertiary); }
+
+/* ── Menu items (Tools screen) ── */
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 12px 8px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s;
+  border-radius: 10px;
+  margin-bottom: 2px;
+}
+.menu-item:last-child { border-bottom: none; }
+.menu-item:hover { background: var(--surface2); }
+.menu-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.menu-icon i { font-size: 20px; }
+.menu-text { flex: 1; }
+.menu-text p    { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+.menu-text span { font-size: 11px; color: var(--text-secondary); margin-top: 1px; display: block; }
+
+/* ── Badges ── */
+.badge { font-size: 10px; padding: 2px 9px; border-radius: 20px; font-weight: 600; }
+.badge.new { background: var(--teal-light); color: #0A7054; }
+.badge.ai  { background: var(--brand-light); color: var(--brand); }
+
+/* ── Tags ── */
+.tag-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.tag {
+  font-size: 12px;
+  padding: 5px 13px;
+  border-radius: 20px;
+  border: 1px solid var(--border2);
+  color: var(--text-secondary);
+  background: var(--surface);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-weight: 500;
+}
+.tag.active {
+  background: var(--brand-light);
+  color: var(--brand);
+  border-color: #B0AAF0;
+  font-weight: 600;
+}
+
+/* ── Forms ── */
+.form-field { margin-bottom: 12px; }
+.form-field label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+.form-field input {
+  width: 100%;
+  font-size: 14px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border2);
+  background: var(--surface);
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.form-field input:focus {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(80,72,200,0.10);
+}
+
+/* ── Primary button ── */
+.btn-main {
+  width: 100%;
+  padding: 13px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--brand), var(--brand-mid));
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.01em;
+}
+.btn-main:hover { opacity: 0.90; transform: translateY(-1px); }
+.btn-main:active { transform: translateY(0); }
+
+/* ── Credit cards ── */
+.credit-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface2);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  border: 1px solid var(--border);
+}
+.credit-card:hover { border-color: var(--brand); box-shadow: 0 4px 12px rgba(80,72,200,0.10); }
+
+/* ── Progress bar ── */
+.prog-bar {
+  height: 7px;
+  border-radius: 4px;
+  background: var(--border);
+  margin-top: 6px;
+}
+.prog-fill { height: 100%; border-radius: 4px; }
+
+/* ── Chat ── */
+.chat-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 18px;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 320px;
+  background: var(--bg);
+}
+.bubble {
+  max-width: 85%;
+  padding: 10px 14px;
+  border-radius: 16px;
+  font-size: 13px;
+  line-height: 1.55;
+}
+.bubble.bot {
+  background: var(--surface);
+  color: var(--text-primary);
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+.bubble.user-msg {
+  background: linear-gradient(135deg, var(--brand), var(--brand-mid));
+  color: #fff;
+  align-self: flex-end;
+  border-bottom-right-radius: 4px;
+}
+.bubble.typing {
+  background: var(--surface);
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
+  color: var(--text-secondary);
+  font-size: 20px;
+  letter-spacing: 2px;
+  border: 1px solid var(--border);
+}
+.chat-bar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 16px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+  background: var(--surface);
+}
+.chat-bar input {
+  flex: 1;
+  font-size: 13px;
+  padding: 9px 14px;
+  border-radius: 22px;
+  border: 1px solid var(--border2);
+  background: var(--surface2);
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+  transition: border-color 0.15s;
+}
+.chat-bar input:focus { outline: none; border-color: var(--brand); }
+.chat-send {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--brand), var(--brand-mid));
+  color: #fff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.15s;
+}
+.chat-send:hover { transform: scale(1.08); }
+
+/* ── Privacy toggles ── */
+.privacy-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--border);
+}
+.privacy-row:last-child { border-bottom: none; }
+.toggle {
+  width: 38px;
+  height: 22px;
+  border-radius: 11px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.toggle.on  { background: var(--teal); justify-content: flex-end; }
+.toggle.off { background: #C5C3D8; justify-content: flex-start; }
+.toggle-knob {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+/* ── Report buttons ── */
+.report-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface2);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.report-btn:hover { border-color: var(--brand); box-shadow: 0 4px 12px rgba(80,72,200,0.10); }
+.report-btn .icon { font-size: 22px; color: var(--brand); }
+.report-btn .rt { flex: 1; }
+.report-btn .rt p    { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.report-btn .rt span { font-size: 11px; color: var(--text-secondary); }
+
+/* ── Toast ── */
+.toast {
+  display: none;
+  background: linear-gradient(135deg, var(--brand), var(--brand-mid));
+  color: #fff;
+  padding: 11px 18px;
+  border-radius: 10px;
+  font-size: 13px;
+  text-align: center;
+  margin: 0 0 10px;
+  font-weight: 500;
+  box-shadow: 0 4px 14px rgba(80,72,200,0.25);
+}
+.toast.show { display: block; }
+
+/* ── Modal ── */
+.modal-overlay {
+  display: none;
+  min-height: 320px;
+  background: rgba(26,24,48,0.52);
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  border-radius: 16px;
+  margin-bottom: 10px;
+  backdrop-filter: blur(2px);
+}
+.modal-overlay.show { display: flex; }
+.modal {
+  background: var(--surface);
+  border-radius: 18px;
+  padding: 22px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+}
+.modal h3 { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 14px; }
+.modal-close {
+  width: 100%;
+  padding: 11px;
+  border-radius: 10px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--text-primary);
+  font-size: 14px;
+  cursor: pointer;
+  margin-top: 14px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+}
+
+/* ── AI gen spinner ── */
+.ai-gen { display: flex; align-items: center; gap: 12px; padding: 18px 0; }
+.ai-gen span { font-size: 13px; color: var(--text-secondary); }
+.dots span { animation: blink 1.2s infinite; font-size: 18px; }
+.dots span:nth-child(2) { animation-delay: 0.3s; }
+.dots span:nth-child(3) { animation-delay: 0.6s; }
+@keyframes blink { 0%,80%,100%{opacity:0.1} 40%{opacity:1} }
+
+/* ── Result box ── */
+.result-box {
+  background: var(--brand-light);
+  border-radius: 12px;
+  padding: 16px;
+  border-left: 3px solid var(--brand);
+}
+.result-box p { font-size: 13px; color: var(--text-primary); line-height: 1.65; white-space: pre-wrap; }
+
+/* ── Quick buttons (chat) ── */
+.quick-btns { padding: 10px 18px 0; display: flex; flex-direction: column; gap: 7px; }
+.quick-btn {
+  padding: 9px 16px;
+  border-radius: 22px;
+  border: 1px solid #B0AAF0;
+  color: var(--brand);
+  background: var(--brand-light);
+  font-size: 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: opacity 0.15s, transform 0.12s;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+}
+.quick-btn:hover { opacity: 0.78; transform: translateX(2px); }
+
+/* ── DB link ── */
+.db-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface2);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  transition: border-color 0.15s;
+}
+.db-link:hover { border-color: var(--brand); }
+.db-link .icon { font-size: 20px; color: var(--brand); flex-shrink:0; }
+.db-link .rt { flex: 1; }
+.db-link .rt p    { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.db-link .rt span { font-size: 11px; color: var(--text-secondary); }
+.db-filterbar { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+.db-select {
+  font-size: 12px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border2);
+  background: var(--surface);
+  color: var(--text-primary);
+  flex: 1;
+  font-family: 'Inter', sans-serif;
+}
+.db-summary { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+.db-summary .card {
+  background: var(--surface2);
+  border-radius: 10px;
+  padding: 9px 6px;
+  text-align: center;
+  border: 1px solid var(--border);
+}
+.db-summary .card .lbl { font-size: 10px; color: var(--text-secondary); font-weight: 500; }
+.db-summary .card .val { font-size: 13px; font-weight: 700; margin-top: 3px; color: var(--text-primary); }
+.db-list { display: flex; flex-direction: column; gap: 0; }
+.db-row { display: flex; align-items: center; gap: 10px; padding: 10px 4px; border-bottom: 1px solid var(--border); }
+.db-row:last-child { border-bottom: none; }
+.db-row .db-ico { width: 30px; height: 30px; border-radius: 8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:14px; }
+.db-row .db-mid { flex: 1; min-width:0; }
+.db-row .db-mid p { font-size: 13px; font-weight: 600; color: var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.db-row .db-mid span { font-size: 11px; color: var(--text-secondary); }
+.db-row .db-amt { font-size: 13px; font-weight: 700; flex-shrink:0; text-align:right; }
+.db-empty { text-align:center; font-size:12px; color:var(--text-secondary); padding:24px 0; }
+.period-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 6px; }
+.period-btn {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.period-btn:hover { border-color: var(--brand); box-shadow: 0 3px 10px rgba(80,72,200,0.12); }
+.period-btn .pn { font-size: 18px; font-weight: 700; color: var(--brand); }
+.period-btn .pl { font-size: 10.5px; color: var(--text-secondary); margin-top: 3px; font-weight: 500; }
+
+/* ===== TAP TO PAY ===== */
+.tp-hero {
+  background: linear-gradient(135deg, var(--brand), var(--brand-mid));
+  border-radius: 18px;
+  padding: 18px;
+  margin-bottom: 16px;
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(80,72,200,0.22);
+}
+.tp-hero p.t { font-size: 14px; font-weight: 700; margin-bottom: 5px; }
+.tp-hero p.s { font-size: 11.5px; opacity: 0.90; line-height: 1.55; }
+.tp-amount-display { text-align: center; padding: 18px 0 6px; }
+.tp-amount-display .cur { font-size: 15px; color: var(--text-secondary); vertical-align: top; }
+.tp-amount-display .amt { font-size: 40px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.02em; }
+.tp-circle-wrap { position: relative; width: 130px; height: 130px; margin: 16px auto 10px; display: flex; align-items: center; justify-content: center; }
+.tp-ring { position: absolute; border: 2px solid rgba(80,72,200,0.35); border-radius: 50%; width: 130px; height: 130px; opacity: 0; animation: tpring 1.8s ease-out infinite; }
+.tp-ring.r2 { animation-delay: 0.6s; }
+.tp-ring.r3 { animation-delay: 1.2s; }
+@keyframes tpring { 0% { width:90px; height:90px; opacity:0.7; } 100% { width:160px; height:160px; opacity:0; } }
+.tp-circle {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--brand), var(--brand-mid));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(80,72,200,0.38);
+  transition: transform 0.15s;
+  position: relative;
+  z-index: 1;
+  border: none;
+}
+.tp-circle:hover { transform: scale(1.05); }
+.tp-circle i { font-size: 36px; color: #fff; }
+.tp-status { text-align: center; font-size: 12.5px; color: var(--text-secondary); margin-top: 5px; }
+.tp-methods { display: flex; justify-content: center; gap: 12px; margin: 10px 0 4px; font-size: 20px; opacity: 0.75; }
+.tp-success { text-align: center; padding: 8px 0; }
+.tp-check {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: var(--teal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 4px auto 12px;
+  box-shadow: 0 4px 16px rgba(23,169,122,0.28);
+}
+.tp-check i { font-size: 32px; color: #fff; }
+.tp-receipt {
+  background: var(--surface2);
+  border-radius: 12px;
+  padding: 14px;
+  margin-top: 8px;
+  text-align: left;
+  border: 1px solid var(--border);
+}
+.tp-receipt .row { display: flex; justify-content: space-between; font-size: 12.5px; padding: 5px 0; color: var(--text-primary); border-bottom: 1px solid var(--border); }
+.tp-receipt .row:last-child { border-bottom: none; }
+.tp-receipt .row span:first-child { color: var(--text-secondary); }
+.tp-hist-row { display: flex; align-items: center; gap: 10px; padding: 10px 4px; border-bottom: 1px solid var(--border); }
+.tp-hist-row:last-child { border-bottom: none; }
+.tp-hist-ico { width: 32px; height: 32px; border-radius: 9px; background: var(--teal-light); color: #0A7054; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+.tp-hist-mid { flex: 1; min-width: 0; }
+.tp-hist-mid p { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.tp-hist-mid span { font-size: 11px; color: var(--text-secondary); }
+.tp-hist-amt { font-size: 13px; font-weight: 700; color: var(--teal); flex-shrink: 0; }
+</style>
+
+<div class="app">
+
+  <!-- HOME -->
+  <div class="screen active" id="s-home">
+    <div class="status-bar"><span>9:41</span><span><i class="ti ti-wifi" style="font-size:13px" aria-hidden="true"></i></span></div>
+    <div class="app-header" style="display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <h2>Hola, Rodrigo 👋</h2>
+        <p>Taquería El Bosque &middot; junio 2026</p>
+      </div>
+      <div onclick="goTo('perfil')" style="width:36px;height:36px;border-radius:50%;background:var(--brand-light);display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid var(--brand);position:relative;">
+        <i class="ti ti-user" style="font-size:18px;color:var(--brand);" aria-hidden="true"></i>
+        <span style="position:absolute;top:-2px;right:-2px;width:9px;height:9px;background:var(--teal);border-radius:50%;border:1.5px solid var(--surface);"></span>
+      </div>
+    </div>
+    <div class="screen-body">
+      <div class="score-ring">
+        <div class="ring" id="score-display">78</div>
+        <div style="flex:1;">
+          <p style="font-size:13px;font-weight:700;color:var(--text-primary);">Score de salud financiera</p>
+          <p style="font-size:11px;color:var(--text-secondary);margin-top:3px;"><i class="ti ti-trending-up" style="color:var(--teal);font-size:12px;"></i> Bueno &middot; Subió 4 pts este mes</p>
+        </div>
+        <div style="width:32px;height:32px;border-radius:50%;background:var(--teal-light);display:flex;align-items:center;justify-content:center;">
+          <i class="ti ti-shield-check" style="font-size:17px;color:var(--teal);" aria-hidden="true"></i>
+        </div>
+      </div>
+
+      <div onclick="goTo('tappay')" style="background:linear-gradient(135deg,var(--brand),var(--brand-mid));border-radius:14px;padding:13px 14px;margin-bottom:14px;display:flex;align-items:center;gap:12px;cursor:pointer;">
+        <div style="width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-nfc" style="font-size:20px;color:#fff;" aria-hidden="true"></i></div>
+        <div style="flex:1;">
+          <p style="font-size:13px;font-weight:600;color:#fff;">Cobra con Tap to Pay</p>
+          <p style="font-size:11px;color:#fff;opacity:0.85;margin-top:1px;">Acepta tarjeta o celular, sin terminal</p>
+        </div>
+        <i class="ti ti-chevron-right" style="font-size:16px;color:#fff;" aria-hidden="true"></i>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-card"><p class="lbl"><i class="ti ti-arrow-up-right" style="font-size:11px;color:var(--teal);margin-right:3px;"></i>Ventas (mes)</p><p class="val up" id="st-v">$48,200</p></div>
+        <div class="stat-card"><p class="lbl"><i class="ti ti-arrow-down-right" style="font-size:11px;color:var(--red);margin-right:3px;"></i>Gastos (mes)</p><p class="val dn" id="st-g">$31,500</p></div>
+        <div class="stat-card"><p class="lbl"><i class="ti ti-wallet" style="font-size:11px;color:var(--brand);margin-right:3px;"></i>Utilidad neta</p><p class="val up" id="st-u">$16,700</p></div>
+        <div class="stat-card"><p class="lbl"><i class="ti ti-percentage" style="font-size:11px;color:var(--amber);margin-right:3px;"></i>Margen</p><p class="val up" id="st-m">34.6%</p></div>
+      </div>
+      <p class="sec-title">Ventas &mdash; ultimos 6 meses</p>
+      <div class="bar-chart" id="bars">
+        <div class="bar" style="height:38%;background:#C0BCE8;" data-l="Ene: $32,000"></div>
+        <div class="bar" style="height:55%;background:#C0BCE8;" data-l="Feb: $36,000"></div>
+        <div class="bar" style="height:48%;background:#C0BCE8;" data-l="Mar: $34,000"></div>
+        <div class="bar" style="height:70%;background:var(--brand-mid);" data-l="Abr: $41,000"></div>
+        <div class="bar" style="height:62%;background:#C0BCE8;" data-l="May: $44,000"></div>
+        <div class="bar" style="height:100%;background:var(--brand);" data-l="Jun: $48,200"></div>
+      </div>
+      <div class="bar-labels"><span class="bar-lbl">Ene</span><span class="bar-lbl">Feb</span><span class="bar-lbl">Mar</span><span class="bar-lbl">Abr</span><span class="bar-lbl">May</span><span class="bar-lbl">Jun</span></div>
+      <div id="bar-tip" style="display:none;margin-top:6px;font-size:12px;color:var(--brand);font-weight:500;text-align:center;"></div>
+    </div>
+    <div class="nav">
+      <button class="nav-tab active" onclick="goTo('home')"><i class="ti ti-home" aria-hidden="true"></i>Inicio</button>
+      <button class="nav-tab" onclick="goTo('tools')"><i class="ti ti-grid-dots" aria-hidden="true"></i>Modulos</button>
+      <button class="nav-tab" onclick="goTo('registro')"><i class="ti ti-plus" aria-hidden="true"></i>Registrar</button>
+      <button class="nav-tab" onclick="goTo('formaliza')"><i class="ti ti-certificate" aria-hidden="true"></i>Formalízate</button>
+      <button class="nav-tab" onclick="goTo('chat')"><i class="ti ti-message" aria-hidden="true"></i>IA</button>
+    </div>
+  </div>
+
+  <!-- TOOLS -->
+  <div class="screen" id="s-tools">
+    <div class="status-bar"><span>9:41</span><span><i class="ti ti-wifi" style="font-size:13px" aria-hidden="true"></i></span></div>
+    <div class="app-header"><h2>Herramientas</h2><p>Todo lo que necesita tu negocio</p></div>
+    <div class="screen-body">
+      <div id="modal-tool" class="modal-overlay">
+        <div class="modal">
+          <h3 id="mt-title">Analizando...</h3>
+          <div id="mt-gen" class="ai-gen"><i class="ti ti-robot" style="font-size:20px;color:var(--brand);" aria-hidden="true"></i><span>Analizando tus datos <span class="dots"><span>.</span><span>.</span><span>.</span></span></span></div>
+          <div id="mt-res" class="result-box" style="display:none;"><p id="mt-text"></p></div>
+          <button class="modal-close" onclick="document.getElementById('modal-tool').classList.remove('show')">Cerrar</button>
+        </div>
+      </div>
+      <div class="menu-item" onclick="goTo('tappay')">
+        <div class="menu-icon" style="background:var(--brand-light);"><i class="ti ti-nfc" style="color:var(--brand);" aria-hidden="true"></i></div>
+        <div class="menu-text"><p>Tap to Pay</p><span>Cobra con tarjeta o celular, sin terminal</span></div>
+        <span class="badge new">Nuevo</span>
+      </div>
+      <div class="menu-item" onclick="openTool('estado')">
+        <div class="menu-icon" style="background:var(--teal-light);"><i class="ti ti-file-invoice" style="color:#0A7054;" aria-hidden="true"></i></div>
+        <div class="menu-text"><p>Estado de resultados</p><span>Generado automaticamente con IA</span></div>
+        <span class="badge ai">IA</span>
+      </div>
+      <div class="menu-item" onclick="openTool('fiscal')">
+        <div class="menu-icon" style="background:var(--brand-light);"><i class="ti ti-calculator" style="color:var(--brand);" aria-hidden="true"></i></div>
+        <div class="menu-text"><p>Simulador fiscal</p><span>Cuanto pagarias y en que regimen</span></div>
+        <span class="badge ai">IA</span>
+      </div>
+      <div class="menu-item" onclick="goTo('creditos')">
+        <div class="menu-icon" style="background:#E6F1FB;"><i class="ti ti-building-bank" style="color:#0C447C;" aria-hidden="true"></i></div>
+        <div class="menu-text"><p>Comparador de creditos</p><span>Elegibilidad estimada real</span></div>
+        <i class="ti ti-chevron-right" style="font-size:14px;color:var(--text-secondary);" aria-hidden="true"></i>
+      </div>
+      <div class="menu-item" onclick="openTool('rentabilidad')">
+        <div class="menu-icon" style="background:var(--amber-light);"><i class="ti ti-trending-up" style="color:#7A4A10;" aria-hidden="true"></i></div>
+        <div class="menu-text"><p>Rentabilidad por producto</p><span>Que vendes vs. que te deja</span></div>
+        <span class="badge ai">IA</span>
+      </div>
+      <div class="menu-item" onclick="openTool('descuento')">
+        <div class="menu-icon" style="background:#FAECE7;"><i class="ti ti-discount" style="color:#712B13;" aria-hidden="true"></i></div>
+        <div class="menu-text"><p>Calculadora de descuentos</p><span>Impacto en margen y costo</span></div>
+        <span class="badge ai">IA</span>
+      </div>
+      <div class="menu-item" onclick="openTool('identidad')">
+        <div class="menu-icon" style="background:#EAF3DE;"><i class="ti ti-id-badge" style="color:#27500A;" aria-hidden="true"></i></div>
+        <div class="menu-text"><p>Mi identidad financiera</p><span>Tu expediente para bancos</span></div>
+        <span class="badge new">Nuevo</span>
+      </div>
+    </div>
+    <div class="nav">
+      <button class="nav-tab" onclick="goTo('home')"><i class="ti ti-home" aria-hidden="true"></i>Inicio</button>
+      <button class="nav-tab active" onclick="goTo('tools')"><i class="ti ti-grid-dots" aria-hidden="true"></i>Modulos</button>
+      <button class="nav-tab" onclick="goTo('registro')"><i class="ti ti-plus" aria-hidden="true"></i>Registrar</button>
+      <button class="nav-tab" onclick="goTo('formaliza')"><i class="ti ti-certificate" aria-hidden="true"></i>Formalízate</button>
+      <button class="nav-tab" onclick="goTo('chat')"><i class="ti ti-message" aria-hidden="true"></i>IA</button>
+    </div>
+  </div>
+
+  <!-- REGISTRO -->
+  <div class="screen" id="s-registro">
+    <div class="status-bar"><span>9:41</span><span><i class="ti ti-wifi" style="font-size:13px" aria-hidden="true"></i></span></div>
+    <div class="app-header"><h2>Nuevo registro</h2><p>Cada dato construye tu historial</p></div>
+    <div class="screen-body">
+      <div class="tag-row" id="tipo-tags">
+        <span class="tag active" onclick="selTag(this)">Venta</span>
+        <span class="tag" onclick="selTag(this)">Gasto</span>
+        <span class="tag" onclick="selTag(this)">Inventario</span>
+        <span class="tag" onclick="selTag(this)">Otro</span>
+      </div>
+      <div class="form-field"><label>Descripcion</label><input type="text" id="reg-desc" placeholder="Ej. Venta de tacos al pastor" /></div>
+      <div class="form-field"><label>Monto ($)</label><input type="number" id="reg-monto" placeholder="0.00" /></div>
+      <div class="form-field"><label>Producto / categoria</label><input type="text" id="reg-prod" placeholder="Ej. Tacos al pastor" /></div>
+      <div id="toast-reg" class="toast">Registro guardado &middot; Score actualizado</div>
+      <button class="btn-main" onclick="guardarRegistro()">Guardar registro</button>
+      <p style="font-size:11px;color:var(--text-secondary);text-align:center;margin-top:8px;">Este dato actualiza tu score y estado de resultados</p>
+    </div>
+    <div class="nav">
+      <button class="nav-tab" onclick="goTo('home')"><i class="ti ti-home" aria-hidden="true"></i>Inicio</button>
+      <button class="nav-tab" onclick="goTo('tools')"><i class="ti ti-grid-dots" aria-hidden="true"></i>Modulos</button>
+      <button class="nav-tab active" onclick="goTo('registro')"><i class="ti ti-plus" aria-hidden="true"></i>Registrar</button>
+      <button class="nav-tab" onclick="goTo('formaliza')"><i class="ti ti-certificate" aria-hidden="true"></i>Formalízate</button>
+      <button class="nav-tab" onclick="goTo('chat')"><i class="ti ti-message" aria-hidden="true"></i>IA</button>
+    </div>
+  </div>
+
+  <!-- TAP TO PAY -->
+  <div class="screen" id="s-tappay">
+    <div class="status-bar"><span>9:41</span><span><i class="ti ti-wifi" style="font-size:13px" aria-hidden="true"></i></span></div>
+    <div class="app-header"><h2>Tap to Pay</h2><p>Cobra con tarjeta o celular, sin terminal física</p></div>
+    <div class="screen-body">
+
+      <div class="tp-hero">
+        <p class="t">📲 Tu telefono ya es tu terminal</p>
+        <p class="s">Acepta tarjetas de credito/debito, Apple Pay y Google Pay acercando la tarjeta o el celular del cliente a tu telefono. Sin hardware adicional.</p>
+      </div>
+
+      <!-- ESTADO 1: FORMULARIO DE COBRO -->
+      <div id="tp-form">
+        <div class="form-field">
+          <label>Monto a cobrar ($)</label>
+          <input type="number" id="tp-monto" placeholder="0.00" inputmode="decimal" />
+        </div>
+        <div class="form-field">
+          <label>Concepto / producto (opcional)</label>
+          <input type="text" id="tp-concepto" placeholder="Ej. 4 tacos al pastor" />
+        </div>
+        <button class="btn-main" onclick="iniciarCobroTap()">Cobrar con Tap to Pay</button>
+        <p style="font-size:10.5px;color:var(--text-secondary);text-align:center;margin-top:8px;line-height:1.4;">Comisión simulada: 2.9% + IVA por transacción · El cobro se suma a tus ventas y a tu score automáticamente.</p>
+      </div>
+
+      <!-- ESTADO 2: ESPERANDO TAP -->
+      <div id="tp-leyendo" style="display:none;text-align:center;padding:6px 0 4px;">
+        <p class="tp-status" id="tp-monto-leyendo" style="font-size:22px;font-weight:700;color:var(--text-primary);margin-bottom:2px;"></p>
+        <div class="tp-circle-wrap">
+          <div class="tp-ring r1"></div>
+          <div class="tp-ring r2"></div>
+          <div class="tp-ring r3"></div>
+          <div class="tp-circle"><i class="ti ti-nfc" aria-hidden="true"></i></div>
+        </div>
+        <p class="tp-status">Acerca la tarjeta, Apple Pay o Google Pay…</p>
+        <div class="tp-methods">
+          <span title="Visa/Mastercard">💳</span>
+          <span title="Apple Pay / Google Pay">📱</span>
+        </div>
+        <button onclick="cancelarCobroTap()" style="margin-top:10px;background:none;border:none;color:var(--text-secondary);font-size:12px;text-decoration:underline;cursor:pointer;">Cancelar</button>
+      </div>
+
+      <!-- ESTADO 3: RESULTADO -->
+      <div id="tp-resultado" style="display:none;">
+        <div class="tp-success">
+          <div class="tp-check"><i class="ti ti-check" aria-hidden="true"></i></div>
+          <p style="font-size:14px;font-weight:600;color:var(--teal);">¡Cobro exitoso!</p>
+          <div class="tp-receipt">
+            <div class="row"><span>Monto cobrado</span><span id="tp-monto-res" style="font-weight:700;"></span></div>
+            <div class="row"><span>Concepto</span><span id="tp-concepto-res"></span></div>
+            <div class="row"><span>Comisión (2.9%+IVA)</span><span id="tp-comision-res"></span></div>
+            <div class="row"><span>Neto a recibir</span><span id="tp-neto-res" style="font-weight:700;color:var(--teal);"></span></div>
+            <div class="row"><span>Hora</span><span id="tp-hora-res"></span></div>
+          </div>
+        </div>
+        <button class="btn-main" style="margin-top:14px;" onclick="nuevoCobroTap()">Nuevo cobro</button>
+      </div>
+
+      <div id="toast-tp" class="toast" style="margin-top:10px;">Cobro recibido · Score actualizado</div>
+
+      <div style="background:var(--brand-light);border-radius:10px;padding:12px;margin-top:14px;">
+        <p style="font-size:12px;color:var(--brand);font-weight:600;margin-bottom:3px;">🏦 Construye historial mientras cobras</p>
+        <p style="font-size:11.5px;color:var(--brand);line-height:1.5;">Cada cobro con Tap to Pay queda registrado en Traza, igual que tus ventas en efectivo. Esto fortalece tu expediente financiero para créditos como NAFIN y Konfio. Al formalizarte con RFC, además puedes liquidar directo a tu cuenta bancaria y bajar tu comisión.</p>
+      </div>
+
+      <p class="sec-title" style="margin-top:16px;">Cobros recientes</p>
+      <div id="tp-historial">
+        <div class="db-empty" id="tp-historial-empty">Aún no tienes cobros con Tap to Pay en esta sesión.</div>
+      </div>
+
+    </div>
+    <div class="nav">
+      <button class="nav-tab" onclick="goTo('home')"><i class="ti ti-home" aria-hidden="true"></i>Inicio</button>
+      <button class="nav-tab active" onclick="goTo('tools')"><i class="ti ti-grid-dots" aria-hidden="true"></i>Modulos</button>
+      <button class="nav-tab" onclick="goTo('registro')"><i class="ti ti-plus" aria-hidden="true"></i>Registrar</button>
+      <button class="nav-tab" onclick="goTo('formaliza')"><i class="ti ti-certificate" aria-hidden="true"></i>Formalízate</button>
+      <button class="nav-tab" onclick="goTo('chat')"><i class="ti ti-message" aria-hidden="true"></i>IA</button>
+    </div>
+  </div>
+
+  <!-- CREDITOS -->
+  <div class="screen" id="s-creditos">
+    <div class="status-bar"><span>9:41</span><span><i class="ti ti-wifi" style="font-size:13px" aria-hidden="true"></i></span></div>
+    <div class="app-header"><h2>Creditos disponibles</h2><p>Basado en tus datos reales del negocio</p></div>
+    <div class="screen-body">
+      <div id="modal-cred" class="modal-overlay">
+        <div class="modal">
+          <h3 id="mc-title">Detalle</h3>
+          <div id="mc-gen" class="ai-gen"><i class="ti ti-robot" style="font-size:20px;color:var(--brand);" aria-hidden="true"></i><span>Analizando elegibilidad <span class="dots"><span>.</span><span>.</span><span>.</span></span></span></div>
+          <div id="mc-res" class="result-box" style="display:none;"><p id="mc-text"></p></div>
+          <button class="modal-close" onclick="document.getElementById('modal-cred').classList.remove('show')">Cerrar</button>
+        </div>
+      </div>
+      <!-- 1. NAFIN -->
+      <div class="credit-card" onclick="openCredito('NAFIN — Mueve tu PyME','$100,000–$5,000,000','11% anual','hasta 60 meses',80,'alta')">
+        <div style="flex:1">
+          <p style="font-size:13px;font-weight:500;color:var(--text-primary);">NAFIN — Mueve tu PyME <span class="badge new">Gov</span></p>
+          <p style="font-size:11px;color:var(--text-secondary);">Hasta $5,000,000 &middot; desde 11% anual &middot; hasta 60 meses</p>
+          <div class="prog-bar"><div class="prog-fill" style="width:80%;background:var(--teal);"></div></div>
+          <p style="font-size:10px;color:#0A7054;margin-top:3px;">80% elegibilidad estimada &middot; Tasa mas baja</p>
+        </div>
+        <i class="ti ti-chevron-right" style="font-size:16px;color:var(--text-secondary);" aria-hidden="true"></i>
+      </div>
+      <!-- 2. Konfio -->
+      <div class="credit-card" onclick="openCredito('Konfio — Credito PyME','$50,000–$6,000,000','~20% anual (1.7% mens.)','12–36 meses',75,'media')">
+        <div style="flex:1">
+          <p style="font-size:13px;font-weight:500;color:var(--text-primary);">Konfio — Credito PyME <span class="badge ai">Fintech</span></p>
+          <p style="font-size:11px;color:var(--text-secondary);">Hasta $6,000,000 &middot; desde 1.7%/mes &middot; Aprobacion 72 hrs</p>
+          <div class="prog-bar"><div class="prog-fill" style="width:75%;background:var(--brand-mid);"></div></div>
+          <p style="font-size:10px;color:var(--brand);margin-top:3px;">75% elegibilidad estimada &middot; Mas rapido para ti hoy</p>
+        </div>
+        <i class="ti ti-chevron-right" style="font-size:16px;color:var(--text-secondary);" aria-hidden="true"></i>
+      </div>
+      <!-- 3. BBVA -->
+      <div class="credit-card" onclick="openCredito('BBVA — Credito Simple PyME','$50,000–$15,000,000','CAT 18.1% (desde 8%)','hasta 60 meses',55,'media-baja')">
+        <div style="flex:1">
+          <p style="font-size:13px;font-weight:500;color:var(--text-primary);">BBVA — Credito Simple PyME</p>
+          <p style="font-size:11px;color:var(--text-secondary);">Hasta $15,000,000 &middot; CAT 18.1% &middot; hasta 60 meses</p>
+          <div class="prog-bar"><div class="prog-fill" style="width:55%;background:var(--amber);"></div></div>
+          <p style="font-size:10px;color:#7A4A10;margin-top:3px;">55% elegibilidad &middot; Requiere mas antiguedad</p>
+        </div>
+        <i class="ti ti-chevron-right" style="font-size:16px;color:var(--text-secondary);" aria-hidden="true"></i>
+      </div>
+      <!-- 4. Banorte -->
+      <div class="credit-card" onclick="openCredito('Banorte — Circulo PyME','$150,000–$17,000,000','CAT 13.8% (TIIE+5.50%)','12–60 meses',50,'media-baja')">
+        <div style="flex:1">
+          <p style="font-size:13px;font-weight:500;color:var(--text-primary);">Banorte — Circulo PyME</p>
+          <p style="font-size:11px;color:var(--text-secondary);">Hasta $17,000,000 &middot; CAT 13.8% &middot; 0% apertura</p>
+          <div class="prog-bar"><div class="prog-fill" style="width:50%;background:var(--amber);"></div></div>
+          <p style="font-size:10px;color:#7A4A10;margin-top:3px;">50% elegibilidad &middot; CAT mas bajo del sector</p>
+        </div>
+        <i class="ti ti-chevron-right" style="font-size:16px;color:var(--text-secondary);" aria-hidden="true"></i>
+      </div>
+      <!-- 5. Bancomext -->
+      <div class="credit-card" onclick="openCredito('Bancomext — Apoyo PyME Export','Variable','Preferencial','Variable',30,'media-baja')">
+        <div style="flex:1">
+          <p style="font-size:13px;font-weight:500;color:var(--text-primary);">Bancomext — Apoyo PyME Export <span class="badge new">Gov</span></p>
+          <p style="font-size:11px;color:var(--text-secondary);">Para exportadores &middot; Tasa preferencial &middot; Canalizacion por bancos</p>
+          <div class="prog-bar"><div class="prog-fill" style="width:30%;background:#C5C3D8;"></div></div>
+          <p style="font-size:10px;color:var(--text-secondary);margin-top:3px;">30% elegibilidad &middot; Requiere actividad exportadora</p>
+        </div>
+        <i class="ti ti-chevron-right" style="font-size:16px;color:var(--text-secondary);" aria-hidden="true"></i>
+      </div>
+      <p style="font-size:11px;color:var(--text-secondary);text-align:center;margin-top:4px;">La elegibilidad mejora cada vez que registras datos en Traza</p>
+    </div>
+    <div class="nav">
+      <button class="nav-tab" onclick="goTo('home')"><i class="ti ti-home" aria-hidden="true"></i>Inicio</button>
+      <button class="nav-tab active" onclick="goTo('tools')"><i class="ti ti-grid-dots" aria-hidden="true"></i>Modulos</button>
+      <button class="nav-tab" onclick="goTo('registro')"><i class="ti ti-plus" aria-hidden="true"></i>Registrar</button>
+      <button class="nav-tab" onclick="goTo('formaliza')"><i class="ti ti-certificate" aria-hidden="true"></i>Formalízate</button>
+      <button class="nav-tab" onclick="goTo('chat')"><i class="ti ti-message" aria-hidden="true"></i>IA</button>
+    </div>
+  </div>
+
+  <!-- CHAT -->
+  <div class="screen" id="s-chat">
+    <div class="status-bar"><span>9:41</span><span><i class="ti ti-wifi" style="font-size:13px" aria-hidden="true"></i></span></div>
+    <div class="app-header"><h2>Asesor IA</h2><p>Conoce tus numeros y responde en tiempo real</p></div>
+    <div class="quick-btns" id="quick-area">
+      <button class="quick-btn" onclick="sendQuick('Que credito PyME me conviene mas hoy?')">Que credito PyME me conviene mas hoy?</button>
+      <button class="quick-btn" onclick="sendQuick('Cuales son los requisitos para NAFIN?')">Cuales son los requisitos para NAFIN?</button>
+      <button class="quick-btn" onclick="sendQuick('Cual es el mejor regimen fiscal para mi negocio?')">Cual es el mejor regimen fiscal para mi negocio?</button>
+      <button class="quick-btn" onclick="sendQuick('Cuanto pago de impuestos en RESICO?')">Cuanto pago de impuestos en RESICO?</button>
+      <button class="quick-btn" onclick="sendQuick('Que ventajas tiene Konfio frente a un banco?')">Que ventajas tiene Konfio frente a un banco?</button>
+      <button class="quick-btn" onclick="sendQuick('Cuanto dinero deberia tener de reserva?')">Cuanto dinero deberia tener de reserva?</button>
+    </div>
+    <div class="chat-messages" id="chat-msgs">
+      <div class="bubble bot">Hola Rodrigo, soy tu asesor financiero IA. Conozco los numeros de tu taqueria y estoy entrenado con informacion actualizada sobre los regimenes fiscales del SAT y los mejores creditos PyME disponibles en Mexico (NAFIN, Konfio, BBVA, Banorte, Bancomext). Preguntame lo que necesites.</div>
+    </div>
+    <div class="chat-bar">
+      <input type="text" id="chat-input" placeholder="Escribe tu pregunta..." onkeydown="if(event.key==='Enter')sendChat()" />
+      <button class="chat-send" onclick="sendChat()" aria-label="Enviar"><i class="ti ti-send" style="font-size:15px;" aria-hidden="true"></i></button>
+    </div>
+    <div class="nav">
+      <button class="nav-tab" onclick="goTo('home')"><i class="ti ti-home" aria-hidden="true"></i>Inicio</button>
+      <button class="nav-tab" onclick="goTo('tools')"><i class="ti ti-grid-dots" aria-hidden="true"></i>Modulos</button>
+      <button class="nav-tab" onclick="goTo('registro')"><i class="ti ti-plus" aria-hidden="true"></i>Registrar</button>
+      <button class="nav-tab" onclick="goTo('formaliza')"><i class="ti ti-certificate" aria-hidden="true"></i>Formalízate</button>
+      <button class="nav-tab active" onclick="goTo('chat')"><i class="ti ti-message" aria-hidden="true"></i>IA</button>
+    </div>
+  </div>
+
+  <!-- PERFIL -->
+  <div class="screen" id="s-perfil">
+    <div class="status-bar"><span>9:41</span><span><i class="ti ti-wifi" style="font-size:13px" aria-hidden="true"></i></span></div>
+    <div class="app-header"><h2>Control de privacidad</h2><p>Tu decides que compartes y con quien</p></div>
+    <div class="screen-body">
+      <div class="privacy-row">
+        <div style="flex:1"><p style="font-size:14px;font-weight:500;color:var(--text-primary);">Compartir con bancos</p><span style="font-size:11px;color:var(--text-secondary);">Estado de resultados y score</span></div>
+        <div class="toggle on" onclick="togglePriv(this)"><div class="toggle-knob"></div></div>
+      </div>
+      <div class="privacy-row">
+        <div style="flex:1"><p style="font-size:14px;font-weight:500;color:var(--text-primary);">Compartir con inversores</p><span style="font-size:11px;color:var(--text-secondary);">Datos de crecimiento y margen</span></div>
+        <div class="toggle on" onclick="togglePriv(this)"><div class="toggle-knob"></div></div>
+      </div>
+      <div class="privacy-row">
+        <div style="flex:1"><p style="font-size:14px;font-weight:500;color:var(--text-primary);">Datos de inventario</p><span style="font-size:11px;color:var(--text-secondary);">Solo visible para ti</span></div>
+        <div class="toggle off" onclick="togglePriv(this)"><div class="toggle-knob"></div></div>
+      </div>
+      <div class="privacy-row">
+        <div style="flex:1"><p style="font-size:14px;font-weight:500;color:var(--text-primary);">Datos de clientes</p><span style="font-size:11px;color:var(--text-secondary);">Solo visible para ti</span></div>
+        <div class="toggle off" onclick="togglePriv(this)"><div class="toggle-knob"></div></div>
+      </div>
+      <p class="sec-title" style="margin-top:16px;">Base de datos del negocio</p>
+      <div class="db-link" onclick="goTo('database')">
+        <i class="ti ti-database icon" aria-hidden="true"></i>
+        <div class="rt"><p>Movimientos e inventario</p><span id="db-link-sub">Cargando registros...</span></div>
+        <i class="ti ti-chevron-right" style="font-size:16px;color:var(--text-secondary);" aria-hidden="true"></i>
+      </div>
+
+      <p class="sec-title" style="margin-top:16px;">Estados financieros &middot; descarga en PDF</p>
+      <div class="period-grid">
+        <div class="period-btn" onclick="generarEstadoPDF(1)"><div class="pn">1</div><div class="pl">Ultimo mes</div></div>
+        <div class="period-btn" onclick="generarEstadoPDF(3)"><div class="pn">3</div><div class="pl">Ultimos 3 meses</div></div>
+        <div class="period-btn" onclick="generarEstadoPDF(6)"><div class="pn">6</div><div class="pl">Ultimos 6 meses</div></div>
+        <div class="period-btn" onclick="generarEstadoPDF(12)"><div class="pn">12</div><div class="pl">Ultimos 12 meses</div></div>
+      </div>
+      <p style="font-size:11px;color:var(--text-secondary);text-align:center;margin:6px 0 0;">Genera un estado de resultados real en PDF con tus datos</p>
+
+      <p class="sec-title" style="margin-top:16px;">Descargar mi expediente</p>
+      <div id="toast-dl" class="toast"></div>
+      <div class="report-btn" onclick="downloadReport('3 meses')">
+        <i class="ti ti-file-text icon" aria-hidden="true"></i>
+        <div class="rt"><p>Reporte 3 meses</p><span>PDF listo para presentar &middot; Jun 2026</span></div>
+        <i class="ti ti-download" style="font-size:16px;color:var(--text-secondary);" aria-hidden="true"></i>
+      </div>
+      <div class="report-btn" onclick="downloadReport('12 meses')">
+        <i class="ti ti-file-analytics icon" aria-hidden="true"></i>
+        <div class="rt"><p>Reporte 12 meses</p><span>Estado completo con score &middot; 2025-2026</span></div>
+        <i class="ti ti-download" style="font-size:16px;color:var(--text-secondary);" aria-hidden="true"></i>
+      </div>
+    </div>
+    <div class="nav">
+      <button class="nav-tab" onclick="goTo('home')"><i class="ti ti-home" aria-hidden="true"></i>Inicio</button>
+      <button class="nav-tab" onclick="goTo('tools')"><i class="ti ti-grid-dots" aria-hidden="true"></i>Modulos</button>
+      <button class="nav-tab" onclick="goTo('registro')"><i class="ti ti-plus" aria-hidden="true"></i>Registrar</button>
+      <button class="nav-tab" onclick="goTo('formaliza')"><i class="ti ti-certificate" aria-hidden="true"></i>Formalízate</button>
+      <button class="nav-tab active" onclick="goTo('chat')"><i class="ti ti-message" aria-hidden="true"></i>IA</button>
+    </div>
+  </div>
+
+  <!-- DATABASE -->
+  <div class="screen" id="s-database">
+    <div class="status-bar"><span>9:41</span><span><i class="ti ti-wifi" style="font-size:13px" aria-hidden="true"></i></span></div>
+    <div class="app-header">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <i class="ti ti-arrow-left" style="font-size:16px;cursor:pointer;color:var(--text-secondary);" onclick="goTo('perfil')" aria-hidden="true"></i>
+        <div><h2>Base de datos</h2><p>Historial completo de movimientos e inventario</p></div>
+      </div>
+    </div>
+    <div class="screen-body">
+      <div class="db-filterbar">
+        <select class="db-select" id="db-mes" onchange="renderDB()">
+          <option value="todos">Todos los meses</option>
+          <option value="Abril 2026">Abril 2026</option>
+          <option value="Mayo 2026">Mayo 2026</option>
+          <option value="Junio 2026">Junio 2026</option>
+        </select>
+      </div>
+      <div class="tag-row" id="db-tags">
+        <span class="tag active" onclick="selDBTag(this,'todos')">Todos</span>
+        <span class="tag" onclick="selDBTag(this,'venta')">Ventas</span>
+        <span class="tag" onclick="selDBTag(this,'gasto')">Gastos</span>
+        <span class="tag" onclick="selDBTag(this,'inventario')">Inventario</span>
+      </div>
+      <div class="db-summary" id="db-summary"></div>
+      <p class="sec-title" id="db-count">Registros</p>
+      <div class="db-list" id="db-list"></div>
+    </div>
+    <div class="nav">
+      <button class="nav-tab" onclick="goTo('home')"><i class="ti ti-home" aria-hidden="true"></i>Inicio</button>
+      <button class="nav-tab" onclick="goTo('tools')"><i class="ti ti-grid-dots" aria-hidden="true"></i>Modulos</button>
+      <button class="nav-tab" onclick="goTo('registro')"><i class="ti ti-plus" aria-hidden="true"></i>Registrar</button>
+      <button class="nav-tab" onclick="goTo('formaliza')"><i class="ti ti-certificate" aria-hidden="true"></i>Formalízate</button>
+      <button class="nav-tab active" onclick="goTo('chat')"><i class="ti ti-message" aria-hidden="true"></i>IA</button>
+    </div>
+  </div>
+
+  <!-- FORMALÍZATE -->
+  <div class="screen" id="s-formaliza">
+    <div class="status-bar"><span>9:41</span><span><i class="ti ti-wifi" style="font-size:13px" aria-hidden="true"></i></span></div>
+    <div class="app-header">
+      <h2>¡Formalízate!</h2>
+      <p>Encuentra el régimen fiscal ideal para tu negocio</p>
+    </div>
+    <div class="screen-body">
+
+      <!-- BANNER MOTIVACIONAL -->
+      <div style="background:linear-gradient(135deg,var(--brand),var(--brand-mid));border-radius:14px;padding:14px 16px;margin-bottom:14px;color:#fff;">
+        <p style="font-size:13px;font-weight:600;margin-bottom:4px;">🏆 Formalízate y accede a créditos reales</p>
+        <p style="font-size:11px;opacity:0.88;line-height:1.5;">Las empresas formales tienen hasta <strong>3x más acceso</strong> a financiamiento bancario, tasas preferenciales y apoyos de gobierno.</p>
+      </div>
+
+      <!-- SUBTABS -->
+      <div class="tag-row" id="ftabs" style="margin-bottom:12px;">
+        <span class="tag active" onclick="fTab(this,'calc')">Calcular impuestos</span>
+        <span class="tag" onclick="fTab(this,'regimenes')">Regímenes</span>
+        <span class="tag" onclick="fTab(this,'ventajas')">Ventajas</span>
+        <span class="tag" onclick="fTab(this,'pasos')">Cómo registrarme</span>
+        <span class="tag" onclick="fTab(this,'ruta')">Ruta paso a paso</span>
+      </div>
+
+      <!-- TAB: CALCULADORA -->
+      <div id="ft-calc">
+        <p class="sec-title">Simulador de impuestos 2025</p>
+
+        <div style="background:linear-gradient(135deg,#E1F5EE,#D0EEE3);border-radius:10px;padding:11px 12px;margin-bottom:12px;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:18px;">🤖</span>
+          <p style="font-size:11px;color:#0A7054;line-height:1.5;flex:1;">Calculado automáticamente con tus <strong>últimos 12 meses</strong> registrados en Traza. Puedes ajustar los valores si lo necesitas.</p>
+        </div>
+
+        <div class="form-field">
+          <label>Ingresos anuales estimados ($)</label>
+          <input type="number" id="f-ingresos" placeholder="Ej. 600,000" oninput="calcFormal(true)" />
+        </div>
+        <div class="form-field">
+          <label>Gastos deducibles anuales ($)</label>
+          <input type="number" id="f-gastos" placeholder="Ej. 200,000" oninput="calcFormal(true)" />
+        </div>
+        <div class="form-field">
+          <label>Tipo de actividad</label>
+          <select class="db-select" id="f-actividad" onchange="calcFormal(true)" style="width:100%;padding:9px 10px;font-size:13px;border-radius:8px;">
+            <option value="alimentos">Venta de alimentos / bebidas</option>
+            <option value="comercio">Comercio al por menor</option>
+            <option value="servicios">Servicios profesionales</option>
+            <option value="manufactura">Manufactura / producción</option>
+            <option value="transporte">Transporte</option>
+          </select>
+        </div>
+        <button type="button" onclick="autofillFormal()" style="width:100%;padding:8px;border-radius:8px;border:0.5px solid #AFA9EC;background:var(--brand-light);color:var(--brand);font-size:12px;cursor:pointer;margin-bottom:4px;">↺ Volver a usar mis datos de Traza</button>
+
+        <div id="f-resultado" style="display:none;">
+          <p class="sec-title" style="margin-top:4px;">Comparativa de regímenes</p>
+          <div id="f-cards" style="display:flex;flex-direction:column;gap:8px;"></div>
+          <div style="background:var(--teal-light);border-radius:10px;padding:12px;margin-top:10px;border-left:3px solid #1D9E75;">
+            <p style="font-size:12px;color:#0A7054;font-weight:600;margin-bottom:2px;">✅ Recomendación personalizada</p>
+            <p id="f-recomend" style="font-size:12px;color:#0A7054;line-height:1.5;"></p>
+          </div>
+          <div style="background:var(--brand-light);border-radius:10px;padding:12px;margin-top:8px;border-left:3px solid var(--brand);">
+            <p style="font-size:12px;color:var(--brand);font-weight:600;margin-bottom:2px;">🏦 Impacto en tu acceso a crédito</p>
+            <p id="f-credito-tip" style="font-size:12px;color:var(--brand);line-height:1.5;"></p>
+          </div>
+        </div>
+        <div id="f-placeholder" style="text-align:center;padding:20px 0;">
+          <p style="font-size:13px;color:var(--text-secondary);">Ingresa tus ingresos anuales para ver cuánto pagarías en cada régimen.</p>
+        </div>
+      </div>
+
+      <!-- TAB: REGÍMENES -->
+      <div id="ft-regimenes" style="display:none;">
+        <div style="display:flex;flex-direction:column;gap:8px;">
+
+          <div style="background:var(--surface2);border-radius:10px;padding:13px;border-left:3px solid #1D9E75;">
+            <p style="font-size:13px;font-weight:600;color:var(--text-primary);">RESICO — Régimen Simplificado de Confianza</p>
+            <p style="font-size:11px;color:var(--text-secondary);margin:4px 0 6px;">Para personas físicas con ingresos hasta $3.5 millones/año</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+              <div style="background:var(--teal-light);border-radius:6px;padding:8px;text-align:center;">
+                <p style="font-size:10px;color:#0A7054;">Tasa ISR</p>
+                <p style="font-size:14px;font-weight:700;color:var(--teal);">1% – 2.5%</p>
+              </div>
+              <div style="background:var(--teal-light);border-radius:6px;padding:8px;text-align:center;">
+                <p style="font-size:10px;color:#0A7054;">IVA</p>
+                <p style="font-size:14px;font-weight:700;color:var(--teal);">16%</p>
+              </div>
+            </div>
+            <p style="font-size:11px;color:var(--text-secondary);margin-top:6px;">✅ Declaración mensual simplificada · ✅ Sin contabilidad compleja · ✅ Ideal para taquerías, tiendas, servicios</p>
+          </div>
+
+          <div style="background:var(--surface2);border-radius:10px;padding:13px;border-left:3px solid #7F77DD;">
+            <p style="font-size:13px;font-weight:600;color:var(--text-primary);">RIF — Régimen de Incorporación Fiscal</p>
+            <p style="font-size:11px;color:var(--text-secondary);margin:4px 0 6px;">Para negocios con ingresos hasta $2 millones/año (en liquidación)</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+              <div style="background:var(--brand-light);border-radius:6px;padding:8px;text-align:center;">
+                <p style="font-size:10px;color:var(--brand);">ISR año 1</p>
+                <p style="font-size:14px;font-weight:700;color:var(--brand);">0%</p>
+              </div>
+              <div style="background:var(--brand-light);border-radius:6px;padding:8px;text-align:center;">
+                <p style="font-size:10px;color:var(--brand);">ISR año 10</p>
+                <p style="font-size:14px;font-weight:700;color:var(--brand);">10%</p>
+              </div>
+            </div>
+            <p style="font-size:11px;color:var(--text-secondary);margin-top:6px;">⚠️ Solo para quienes ya estaban en RIF antes de 2022 · Se recomienda migrar a RESICO</p>
+          </div>
+
+          <div style="background:var(--surface2);border-radius:10px;padding:13px;border-left:3px solid #EF9F27;">
+            <p style="font-size:13px;font-weight:600;color:var(--text-primary);">Régimen General de Personas Morales</p>
+            <p style="font-size:11px;color:var(--text-secondary);margin:4px 0 6px;">Para empresas (S.A. de C.V., S. de R.L., etc.)</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+              <div style="background:var(--amber-light);border-radius:6px;padding:8px;text-align:center;">
+                <p style="font-size:10px;color:#7A4A10;">ISR</p>
+                <p style="font-size:14px;font-weight:700;color:#7A4A10;">30%</p>
+              </div>
+              <div style="background:var(--amber-light);border-radius:6px;padding:8px;text-align:center;">
+                <p style="font-size:10px;color:#7A4A10;">Reparto PTU</p>
+                <p style="font-size:14px;font-weight:700;color:#7A4A10;">10%</p>
+              </div>
+            </div>
+            <p style="font-size:11px;color:var(--text-secondary);margin-top:6px;">✅ Mayor acceso a crédito institucional · ✅ Emitir facturas a empresas grandes · ⚠️ Requiere contador</p>
+          </div>
+
+          <div style="background:var(--surface2);border-radius:10px;padding:13px;border-left:3px solid #D85A30;">
+            <p style="font-size:13px;font-weight:600;color:var(--text-primary);">Actividades Empresariales (P. Física)</p>
+            <p style="font-size:11px;color:var(--text-secondary);margin:4px 0 6px;">Sin límite de ingresos · Régimen general para personas físicas</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+              <div style="background:#FAECE7;border-radius:6px;padding:8px;text-align:center;">
+                <p style="font-size:10px;color:#712B13;">ISR máx.</p>
+                <p style="font-size:14px;font-weight:700;color:var(--red);">35%</p>
+              </div>
+              <div style="background:#FAECE7;border-radius:6px;padding:8px;text-align:center;">
+                <p style="font-size:10px;color:#712B13;">Deducciones</p>
+                <p style="font-size:14px;font-weight:700;color:var(--red);">Sí</p>
+              </div>
+            </div>
+            <p style="font-size:11px;color:var(--text-secondary);margin-top:6px;">✅ Deduces gastos reales · ✅ Sin límite de ingresos · ⚠️ Tasa progresiva más alta</p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- TAB: VENTAJAS -->
+      <div id="ft-ventajas" style="display:none;">
+        <div style="display:flex;flex-direction:column;gap:8px;">
+
+          <div style="background:linear-gradient(135deg,#E1F5EE,#D0EEE3);border-radius:10px;padding:13px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+              <span style="font-size:22px;">🏦</span>
+              <p style="font-size:13px;font-weight:600;color:#0A7054;">Acceso a créditos formales</p>
+            </div>
+            <p style="font-size:11.5px;color:#0A7054;line-height:1.55;">Con RFC activo y declaraciones al día, puedes aplicar a NAFIN, Banorte, BBVA y fintechs como Konfio. Las tasas son hasta 40% más bajas que el crédito informal.</p>
+          </div>
+
+          <div style="background:linear-gradient(135deg,#EEEDFE,#E0DDFB);border-radius:10px;padding:13px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+              <span style="font-size:22px;">📄</span>
+              <p style="font-size:13px;font-weight:600;color:var(--brand);">Facturación electrónica</p>
+            </div>
+            <p style="font-size:11.5px;color:var(--brand);line-height:1.55;">Emites CFDIs y puedes vender a empresas, gobierno y clientes que piden factura. Esto multiplica tu mercado potencial y formaliza tus relaciones comerciales.</p>
+          </div>
+
+          <div style="background:linear-gradient(135deg,#E6F1FB,#D6E8F7);border-radius:10px;padding:13px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+              <span style="font-size:22px;">🛡️</span>
+              <p style="font-size:13px;font-weight:600;color:#0C447C;">Seguridad social e IMSS</p>
+            </div>
+            <p style="font-size:11.5px;color:#0C447C;line-height:1.55;">Tú y tus empleados acceden a servicios médicos, pensión e incapacidades. Protege tu salud y la de tu equipo sin depender de gastos inesperados.</p>
+          </div>
+
+          <div style="background:linear-gradient(135deg,#FAEEDA,#F5E3C5);border-radius:10px;padding:13px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+              <span style="font-size:22px;">📈</span>
+              <p style="font-size:13px;font-weight:600;color:#7A4A10;">Apoyos y programas de gobierno</p>
+            </div>
+            <p style="font-size:11.5px;color:#7A4A10;line-height:1.55;">Solo los negocios registrados acceden a fondos de SE, INADEM, FONACOT, programas de capacitación y licitaciones públicas. Es dinero que ya existe esperando negocios formales.</p>
+          </div>
+
+          <div style="background:linear-gradient(135deg,#EAF3DE,#DDF0CA);border-radius:10px;padding:13px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+              <span style="font-size:22px;">💳</span>
+              <p style="font-size:13px;font-weight:600;color:#27500A;">Terminal bancaria y pagos digitales</p>
+            </div>
+            <p style="font-size:11.5px;color:#27500A;line-height:1.55;">Con RFC puedes aceptar pagos con tarjeta (CLIP, Square, Mercado Pago) y transferencias, reduciendo el riesgo de manejo de efectivo y ampliando tus formas de cobro.</p>
+          </div>
+
+          <div style="background:linear-gradient(135deg,#FCE8E8,#FAD4D4);border-radius:10px;padding:13px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+              <span style="font-size:22px;">⚖️</span>
+              <p style="font-size:13px;font-weight:600;color:#8B1A1A;">Protección legal</p>
+            </div>
+            <p style="font-size:11.5px;color:#8B1A1A;line-height:1.55;">Operar en la formalidad te protege de multas, clausuras y decomisos. Tienes derechos como empresario: contratos válidos, acceso a tribunales comerciales y defensa ante el SAT.</p>
+          </div>
+
+          <!-- IMPACTO EN CRÉDITOS YA DISPONIBLES EN TRAZA -->
+          <div style="background:var(--surface2);border-radius:10px;padding:13px;border:0.5px solid var(--border);margin-top:4px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+              <span style="font-size:20px;">📊</span>
+              <p style="font-size:13px;font-weight:600;color:var(--text-primary);">Cuánto sube tu elegibilidad al formalizarte</p>
+            </div>
+            <p style="font-size:11px;color:var(--text-secondary);margin-bottom:10px;line-height:1.5;">Estos son los créditos PyME disponibles en Traza. Con RFC activo y declaraciones al corriente, tu elegibilidad estimada mejora así:</p>
+
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <div>
+                <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;">
+                  <p style="font-size:12px;font-weight:500;color:var(--text-primary);">NAFIN — Mueve tu PyME</p>
+                  <p style="font-size:11px;color:var(--teal);font-weight:600;">80% → 96%</p>
+                </div>
+                <div class="prog-bar"><div class="prog-fill" style="width:96%;background:var(--teal);"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;">
+                  <p style="font-size:12px;font-weight:500;color:var(--text-primary);">Konfio — Crédito PyME</p>
+                  <p style="font-size:11px;color:var(--brand-mid);font-weight:600;">75% → 92%</p>
+                </div>
+                <div class="prog-bar"><div class="prog-fill" style="width:92%;background:var(--brand-mid);"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;">
+                  <p style="font-size:12px;font-weight:500;color:var(--text-primary);">BBVA — Crédito Simple PyME</p>
+                  <p style="font-size:11px;color:var(--amber);font-weight:600;">55% → 78%</p>
+                </div>
+                <div class="prog-bar"><div class="prog-fill" style="width:78%;background:var(--amber);"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;">
+                  <p style="font-size:12px;font-weight:500;color:var(--text-primary);">Banorte — Círculo PyME</p>
+                  <p style="font-size:11px;color:var(--amber);font-weight:600;">50% → 74%</p>
+                </div>
+                <div class="prog-bar"><div class="prog-fill" style="width:74%;background:var(--amber);"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;">
+                  <p style="font-size:12px;font-weight:500;color:var(--text-primary);">Bancomext — Apoyo PyME Export</p>
+                  <p style="font-size:11px;color:var(--text-secondary);font-weight:600;">30% → 52%</p>
+                </div>
+                <div class="prog-bar"><div class="prog-fill" style="width:52%;background:#C5C3D8;"></div></div>
+              </div>
+            </div>
+
+            <p style="font-size:10.5px;color:var(--text-secondary);margin-top:10px;line-height:1.45;">* Estimación basada en tu historial actual en Traza + RFC activo, e.firma vigente y declaraciones presentadas en tiempo. Ve a la sección <strong>Créditos</strong> para más detalle de cada uno.</p>
+            <button class="btn-main" style="margin-top:10px;" onclick="goTo('creditos')">Ver mis créditos disponibles</button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- TAB: PASOS -->
+      <div id="ft-pasos" style="display:none;">
+        <p class="sec-title">Regístrate en el SAT — paso a paso</p>
+        <div style="display:flex;flex-direction:column;gap:0;">
+
+          <div style="display:flex;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--border);">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">1</div>
+            <div>
+              <p style="font-size:13px;font-weight:500;color:var(--text-primary);">Obtén tu CURP actualizada</p>
+              <p style="font-size:11px;color:var(--text-secondary);margin-top:2px;line-height:1.45;">Descárgala en <strong>gob.mx/curp</strong> — es gratuita y la necesitas para iniciar tu trámite en el SAT.</p>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--border);">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">2</div>
+            <div>
+              <p style="font-size:13px;font-weight:500;color:var(--text-primary);">Agenda cita en el SAT</p>
+              <p style="font-size:11px;color:var(--text-secondary);margin-top:2px;line-height:1.45;">Entra a <strong>sat.gob.mx</strong> → "Citas" → busca oficina cercana. Necesitarás: CURP, comprobante de domicilio (no mayor a 3 meses) e identificación oficial.</p>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--border);">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">3</div>
+            <div>
+              <p style="font-size:13px;font-weight:500;color:var(--text-primary);">Elige tu régimen fiscal</p>
+              <p style="font-size:11px;color:var(--text-secondary);margin-top:2px;line-height:1.45;">Para la mayoría de micronegocios con ventas menores a $3.5M al año, el <strong>RESICO</strong> es la mejor opción. Usa la calculadora de esta pantalla para confirmar.</p>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--border);">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">4</div>
+            <div>
+              <p style="font-size:13px;font-weight:500;color:var(--text-primary);">Obtén tu RFC y e.firma</p>
+              <p style="font-size:11px;color:var(--text-secondary);margin-top:2px;line-height:1.45;">En la cita te dan tu RFC y puedes tramitar la e.firma (firma electrónica). Esta firma digital es tu llave para declarar, facturar y acceder a servicios fiscales en línea.</p>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--border);">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">5</div>
+            <div>
+              <p style="font-size:13px;font-weight:500;color:var(--text-primary);">Activa el facturador gratuito del SAT</p>
+              <p style="font-size:11px;color:var(--text-secondary);margin-top:2px;line-height:1.45;">El SAT ofrece <strong>Mis Cuentas</strong> y el <strong>Facturador en línea</strong> sin costo. Puedes emitir tus primeros CFDIs sin pagar un sistema externo.</p>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:12px;padding:10px 0;">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">6</div>
+            <div>
+              <p style="font-size:13px;font-weight:500;color:var(--text-primary);">¡Haz tu primera declaración!</p>
+              <p style="font-size:11px;color:var(--text-secondary);margin-top:2px;line-height:1.45;">En RESICO declaras mensualmente los días 17 de cada mes. Con Traza ya tienes tus ingresos y gastos organizados — solo copia los datos al portal del SAT.</p>
+            </div>
+          </div>
+
+        </div>
+
+        <div style="background:var(--brand-light);border-radius:10px;padding:12px;margin-top:12px;">
+          <p style="font-size:12px;color:var(--brand);font-weight:600;margin-bottom:3px;">💡 Tip Traza</p>
+          <p style="font-size:11.5px;color:var(--brand);line-height:1.5;">Con tus registros en Traza, ya tienes un estado de cuenta informal listo. Cuando te formalices, podrás importar esos datos como base de tu contabilidad fiscal.</p>
+        </div>
+
+        <button class="btn-main" style="margin-top:12px;" onclick="goTo('chat')">Pregúntale al asesor IA sobre regímenes</button>
+      </div>
+
+      <!-- TAB: RUTA PASO A PASO -->
+      <div id="ft-ruta" style="display:none;">
+        <p class="sec-title">Ruta paso a paso para formalizarte</p>
+
+        <div style="background:linear-gradient(135deg,var(--brand),var(--brand-mid));border-radius:12px;padding:14px;margin-bottom:14px;color:#fff;">
+          <p style="font-size:12px;opacity:0.85;margin-bottom:4px;">Progreso</p>
+          <div style="display:flex;gap:6px;margin-bottom:8px;" id="ruta-cajas"></div>
+          <p style="font-size:13px;font-weight:600;" id="ruta-progreso-txt">0 de 6 pasos completados</p>
+        </div>
+
+        <div id="ruta-lista" style="display:flex;flex-direction:column;gap:8px;"></div>
+
+        <div id="ruta-final" style="display:none;background:var(--teal-light);border-radius:10px;padding:13px;margin-top:12px;border-left:3px solid #1D9E75;">
+          <p style="font-size:12px;color:#0A7054;font-weight:600;margin-bottom:3px;">🎉 ¡Felicidades, estás formalizado!</p>
+          <p style="font-size:11.5px;color:#0A7054;line-height:1.5;">Ya cumpliste los 6 pasos. Ahora tu negocio puede acceder a créditos formales, facturar electrónicamente y construir historial crediticio real. Revisa la pestaña de Créditos para ver tu elegibilidad actualizada.</p>
+        </div>
+
+        <button class="btn-main" style="margin-top:12px;" onclick="goTo('creditos')">Ver mi elegibilidad de crédito</button>
+      </div>
+
+    </div>
+    <div class="nav">
+      <button class="nav-tab" onclick="goTo('home')"><i class="ti ti-home" aria-hidden="true"></i>Inicio</button>
+      <button class="nav-tab" onclick="goTo('tools')"><i class="ti ti-grid-dots" aria-hidden="true"></i>Modulos</button>
+      <button class="nav-tab" onclick="goTo('registro')"><i class="ti ti-plus" aria-hidden="true"></i>Registrar</button>
+      <button class="nav-tab active" onclick="goTo('formaliza')"><i class="ti ti-certificate" aria-hidden="true"></i>Formalízate</button>
+      <button class="nav-tab" onclick="goTo('chat')"><i class="ti ti-message" aria-hidden="true"></i>IA</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+var ventas = 48200, gastos = 31500, numReg = 0, currentTipo = 'Venta';
+
+function goTo(s) {
+  document.querySelectorAll('.screen').forEach(function(el) { el.classList.remove('active'); el.style.display = 'none'; });
+  var t = document.getElementById('s-' + s);
+  if (t) { t.classList.add('active'); t.style.display = 'flex'; }
+  var map = { home:0, tools:1, creditos:1, tappay:1, registro:2, formaliza:3, chat:4, perfil:4, database:4 };
+  var idx = map[s] !== undefined ? map[s] : 0;
+  if (t) { t.querySelectorAll('.nav-tab').forEach(function(tb, i) { tb.classList.toggle('active', i === idx); }); }
+  if (s === 'database') renderDB();
+}
+
+document.querySelectorAll('#bars .bar').forEach(function(b) {
+  b.addEventListener('click', function() {
+    var tip = document.getElementById('bar-tip');
+    tip.textContent = b.getAttribute('data-l');
+    tip.style.display = 'block';
+    clearTimeout(b._t);
+    b._t = setTimeout(function() { tip.style.display = 'none'; }, 2000);
+  });
+});
+
+function selTag(el) {
+  currentTipo = el.textContent;
+  document.querySelectorAll('#tipo-tags .tag').forEach(function(t) { t.classList.remove('active'); });
+  el.classList.add('active');
+}
+
+function calcScore() {
+  var util = ventas - gastos;
+  var margen = ventas > 0 ? util / ventas : 0;
+  var base = 78;
+  var bonReg = Math.min(10, numReg);
+  var bonMargen = 0;
+  if (margen >= 0.30) bonMargen = 8;
+  else if (margen >= 0.15) bonMargen = 4;
+  else if (margen >= 0) bonMargen = 0;
+  else if (margen >= -0.10) bonMargen = -10;
+  else if (margen >= -0.25) bonMargen = -20;
+  else bonMargen = -35;
+  return Math.max(10, Math.min(99, base + bonReg + bonMargen));
+}
+
+function actualizarStatsUI() {
+  var util = ventas - gastos;
+  var margen = ventas > 0 ? (util / ventas * 100).toFixed(1) : '0.0';
+  var score = calcScore();
+  document.getElementById('st-v').textContent = '$' + Math.round(ventas).toLocaleString();
+  document.getElementById('st-g').textContent = '$' + Math.round(gastos).toLocaleString();
+  var utilEl = document.getElementById('st-u');
+  utilEl.textContent = '$' + Math.round(util).toLocaleString();
+  utilEl.className = 'val ' + (util >= 0 ? 'up' : 'dn');
+  var margenEl = document.getElementById('st-m');
+  margenEl.textContent = margen + '%';
+  margenEl.className = 'val ' + (util >= 0 ? 'up' : 'dn');
+  var ring = document.getElementById('score-display');
+  ring.textContent = score;
+  var ringColor = score >= 86 ? '#1D9E75' : score >= 70 ? '#EF9F27' : '#D85A30';
+  ring.parentElement.style.borderColor = ringColor;
+  ring.style.color = ringColor;
+  var scoreLabel = ring.nextElementSibling ? ring.nextElementSibling.querySelector('p:last-child') : null;
+  if (scoreLabel) scoreLabel.textContent = score >= 86 ? 'Excelente · Subio puntos' : score >= 70 ? 'Bueno · Score estable' : 'En riesgo · Gastos superan ventas';
+  return { util: util, margen: margen, score: score };
+}
+
+function guardarRegistro() {
+  var desc = document.getElementById('reg-desc').value.trim();
+  var monto = parseFloat(document.getElementById('reg-monto').value);
+  if (!desc || !monto) { alert('Ingresa descripcion y monto.'); return; }
+  if (currentTipo === 'Venta') ventas += monto;
+  if (currentTipo === 'Gasto') gastos += monto;
+  numReg++;
+  var stats = actualizarStatsUI();
+  document.getElementById('reg-desc').value = '';
+  document.getElementById('reg-monto').value = '';
+  document.getElementById('reg-prod').value = '';
+  showToast('toast-reg', stats.util < 0 ? '⚠️ Gastos superan ventas — score bajo' : 'Registro guardado · Score actualizado');
+}
+
+function showToast(id, msg) {
+  var t = document.getElementById(id);
+  if (msg) t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 2800);
+}
+
+function fmtMoney(n) { return '$' + Math.round(n).toLocaleString(); }
+
+/* ===== TAP TO PAY ===== */
+var tapPayHistory = [];
+var tapPayTimer = null;
+
+function horaActualTap() {
+  var d = new Date();
+  var h = d.getHours(), m = d.getMinutes();
+  var ampm = h >= 12 ? 'p.m.' : 'a.m.';
+  var h12 = h % 12; if (h12 === 0) h12 = 12;
+  return h12 + ':' + (m < 10 ? '0' : '') + m + ' ' + ampm;
+}
+
+function iniciarCobroTap() {
+  var monto = parseFloat(document.getElementById('tp-monto').value);
+  if (!monto || monto <= 0) { alert('Ingresa un monto valido para cobrar.'); return; }
+
+  document.getElementById('tp-form').style.display = 'none';
+  document.getElementById('tp-resultado').style.display = 'none';
+  document.getElementById('tp-leyendo').style.display = 'block';
+  document.getElementById('tp-monto-leyendo').textContent = fmtMoney(monto);
+
+  tapPayTimer = setTimeout(function() {
+    confirmarCobroTap(monto);
+  }, 1700 + Math.random() * 800);
+}
+
+function cancelarCobroTap() {
+  clearTimeout(tapPayTimer);
+  document.getElementById('tp-leyendo').style.display = 'none';
+  document.getElementById('tp-form').style.display = 'block';
+}
+
+function confirmarCobroTap(monto) {
+  var concepto = document.getElementById('tp-concepto').value.trim() || 'Venta Tap to Pay';
+  var comision = monto * 0.029 * 1.16;
+  var neto = monto - comision;
+  var hora = horaActualTap();
+
+  ventas += monto;
+  numReg++;
+  actualizarStatsUI();
+
+  tapPayHistory.unshift({ monto: monto, concepto: concepto, hora: hora, comision: comision });
+  renderTapPayHistory();
+
+  document.getElementById('tp-leyendo').style.display = 'none';
+  document.getElementById('tp-resultado').style.display = 'block';
+  document.getElementById('tp-monto-res').textContent = fmtMoney(monto);
+  document.getElementById('tp-concepto-res').textContent = concepto;
+  document.getElementById('tp-comision-res').textContent = '-' + fmtMoney(comision);
+  document.getElementById('tp-neto-res').textContent = fmtMoney(neto);
+  document.getElementById('tp-hora-res').textContent = hora;
+
+  showToast('toast-tp', 'Cobro recibido · Score actualizado');
+}
+
+function nuevoCobroTap() {
+  document.getElementById('tp-resultado').style.display = 'none';
+  document.getElementById('tp-form').style.display = 'block';
+  document.getElementById('tp-monto').value = '';
+  document.getElementById('tp-concepto').value = '';
+  document.getElementById('tp-monto').focus();
+}
+
+function renderTapPayHistory() {
+  var cont = document.getElementById('tp-historial');
+  if (!cont) return;
+  if (tapPayHistory.length === 0) {
+    cont.innerHTML = '<div class="db-empty" id="tp-historial-empty">Aún no tienes cobros con Tap to Pay en esta sesión.</div>';
+    return;
+  }
+  var html = '';
+  tapPayHistory.forEach(function(t) {
+    html += '<div class="tp-hist-row">' +
+      '<div class="tp-hist-ico"><i class="ti ti-nfc" aria-hidden="true"></i></div>' +
+      '<div class="tp-hist-mid"><p>' + t.concepto + '</p><span>' + t.hora + '</span></div>' +
+      '<div class="tp-hist-amt">' + fmtMoney(t.monto) + '</div>' +
+    '</div>';
+  });
+  cont.innerHTML = html;
+}
+
+/* ===== Historial mensual (12 meses) para estados financieros ===== */
+var monthlyHistory = [
+  { mes:'Julio 2025',      ventas:28000, gastos:19500 },
+  { mes:'Agosto 2025',     ventas:29500, gastos:20000 },
+  { mes:'Septiembre 2025', ventas:31000, gastos:21000 },
+  { mes:'Octubre 2025',    ventas:33500, gastos:22000 },
+  { mes:'Noviembre 2025',  ventas:36000, gastos:23500 },
+  { mes:'Diciembre 2025',  ventas:39000, gastos:25000 },
+  { mes:'Enero 2026',      ventas:32000, gastos:22500 },
+  { mes:'Febrero 2026',    ventas:36000, gastos:24000 },
+  { mes:'Marzo 2026',      ventas:34000, gastos:23000 },
+  { mes:'Abril 2026',      ventas:41000, gastos:26500 },
+  { mes:'Mayo 2026',       ventas:44000, gastos:28000 },
+  { mes:'Junio 2026',      ventas:48200, gastos:31500 }
+];
+
+/* ===== Base de datos de movimientos e inventario (ultimos 3 meses) ===== */
+var productos = ['Tacos al pastor', 'Quesadillas', 'Tortas', 'Bebidas'];
+var movimientosDB = (function build() {
+  var rows = [];
+  var ventaShare = { 'Tacos al pastor':0.45, 'Quesadillas':0.22, 'Tortas':0.15, 'Bebidas':0.18 };
+  var meses = [
+    { mes:'Abril 2026', ventas:41000, gastos:26500, stockBase:{ 'Tacos al pastor':180,'Quesadillas':95,'Tortas':60,'Bebidas':240 } },
+    { mes:'Mayo 2026',  ventas:44000, gastos:28000, stockBase:{ 'Tacos al pastor':190,'Quesadillas':100,'Tortas':58,'Bebidas':260 } },
+    { mes:'Junio 2026', ventas:48200, gastos:31500, stockBase:{ 'Tacos al pastor':205,'Quesadillas':108,'Tortas':55,'Bebidas':280 } }
+  ];
+  var semanas = ['Semana 1','Semana 2','Semana 3','Semana 4'];
+  meses.forEach(function(m) {
+    productos.forEach(function(p) {
+      var totalProd = m.ventas * ventaShare[p];
+      semanas.forEach(function(s, i) {
+        var pesos = [0.22,0.25,0.24,0.29];
+        rows.push({ tipo:'venta', mes:m.mes, fecha:s, nombre:p, monto: Math.round(totalProd * pesos[i]) });
+      });
+    });
+    var gastoCat = { 'Insumos': m.gastos*0.48, 'Renta': m.gastos*0.20, 'Nomina': m.gastos*0.24, 'Servicios': m.gastos*0.06, 'Otros': m.gastos*0.02 };
+    Object.keys(gastoCat).forEach(function(cat) {
+      rows.push({ tipo:'gasto', mes:m.mes, fecha:'Mensual', nombre:cat, monto: Math.round(gastoCat[cat]) });
+    });
+    productos.forEach(function(p) {
+      rows.push({ tipo:'inventario', mes:m.mes, fecha:'Corte de mes', nombre:p, monto: m.stockBase[p], unidad:'unidades en stock' });
+    });
+  });
+  return rows;
+})();
+var currentDBFilter = 'todos';
+
+function selDBTag(el, tipo) {
+  currentDBFilter = tipo;
+  document.querySelectorAll('#db-tags .tag').forEach(function(t) { t.classList.remove('active'); });
+  el.classList.add('active');
+  renderDB();
+}
+
+function renderDB() {
+  var mesSel = document.getElementById('db-mes').value;
+  var rows = movimientosDB.filter(function(r) {
+    var okMes = (mesSel === 'todos') || (r.mes === mesSel);
+    var okTipo = (currentDBFilter === 'todos') || (r.tipo === currentDBFilter);
+    return okMes && okTipo;
+  });
+
+  var totV = 0, totG = 0, totItems = 0;
+  movimientosDB.filter(function(r){ return (mesSel==='todos')||(r.mes===mesSel); }).forEach(function(r) {
+    if (r.tipo === 'venta') totV += r.monto;
+    if (r.tipo === 'gasto') totG += r.monto;
+    if (r.tipo === 'inventario') totItems += r.monto;
+  });
+  document.getElementById('db-summary').innerHTML =
+    '<div class="card"><p class="lbl">Ventas</p><p class="val" style="color:var(--teal);">' + fmtMoney(totV) + '</p></div>' +
+    '<div class="card"><p class="lbl">Gastos</p><p class="val" style="color:var(--red);">' + fmtMoney(totG) + '</p></div>' +
+    '<div class="card"><p class="lbl">Inventario</p><p class="val">' + totItems.toLocaleString() + ' pzs</p></div>';
+
+  document.getElementById('db-count').textContent = 'Registros (' + rows.length + ')';
+
+  var icoMap = { venta:{bg:'#E1F5EE',col:'#0F6E56',i:'ti-receipt-2'}, gasto:{bg:'#FAECE7',col:'#712B13',i:'ti-arrow-down'}, inventario:{bg:'#EEEDFE',col:'#3C3489',i:'ti-package'} };
+  var html = '';
+  if (rows.length === 0) {
+    html = '<div class="db-empty">No hay registros para este filtro.</div>';
+  } else {
+    rows.slice().reverse().forEach(function(r) {
+      var ic = icoMap[r.tipo];
+      var amt = r.tipo === 'inventario' ? (r.monto.toLocaleString() + ' u.') : fmtMoney(r.monto);
+      var color = r.tipo === 'venta' ? '#1D9E75' : (r.tipo === 'gasto' ? '#D85A30' : 'var(--text-primary)');
+      html += '<div class="db-row">' +
+        '<div class="db-ico" style="background:' + ic.bg + ';color:' + ic.col + ';"><i class="ti ' + ic.i + '" aria-hidden="true"></i></div>' +
+        '<div class="db-mid"><p>' + r.nombre + '</p><span>' + r.mes + ' &middot; ' + r.fecha + '</span></div>' +
+        '<div class="db-amt" style="color:' + color + ';">' + amt + '</div>' +
+      '</div>';
+    });
+  }
+  document.getElementById('db-list').innerHTML = html;
+}
+
+(function initDBLinkSub() {
+  setTimeout(function() {
+    var el = document.getElementById('db-link-sub');
+    if (el) el.textContent = movimientosDB.length + ' registros · ultimos 3 meses';
+  }, 0);
+})();
+
+/* ===== Generador de estados financieros en PDF real ===== */
+function generarEstadoPDF(numMeses) {
+  if (!window.jspdf) { alert('No se pudo cargar el generador de PDF. Verifica tu conexion.'); return; }
+  var data = monthlyHistory.slice(Math.max(0, monthlyHistory.length - numMeses));
+  var jsPDFLib = window.jspdf.jsPDF;
+  var doc = new jsPDFLib();
+  var totalVentas = 0, totalGastos = 0;
+
+  doc.setFontSize(16);
+  doc.text('Estado de Resultados', 14, 18);
+  doc.setFontSize(10);
+  doc.text('Taqueria El Bosque', 14, 25);
+  doc.text('Periodo: ' + data[0].mes + ' a ' + data[data.length - 1].mes, 14, 30);
+  doc.text('Generado: ' + new Date().toLocaleDateString('es-MX'), 14, 35);
+
+  var y = 46;
+  doc.setFontSize(11);
+  doc.text('Mes', 14, y);
+  doc.text('Ingresos', 70, y);
+  doc.text('Gastos', 110, y);
+  doc.text('Utilidad', 150, y);
+  doc.text('Margen', 180, y);
+  y += 3;
+  doc.line(14, y, 196, y);
+  y += 6;
+  doc.setFontSize(9.5);
+
+  data.forEach(function(m) {
+    var util = m.ventas - m.gastos;
+    var margen = ((util / m.ventas) * 100).toFixed(1) + '%';
+    totalVentas += m.ventas;
+    totalGastos += m.gastos;
+    doc.text(m.mes, 14, y);
+    doc.text(fmtMoney(m.ventas), 70, y);
+    doc.text(fmtMoney(m.gastos), 110, y);
+    doc.text(fmtMoney(util), 150, y);
+    doc.text(margen, 180, y);
+    y += 6;
+    if (y > 270) { doc.addPage(); y = 20; }
+  });
+
+  y += 4;
+  doc.line(14, y, 196, y);
+  y += 8;
+  var utilTotal = totalVentas - totalGastos;
+  var margenTotal = ((utilTotal / totalVentas) * 100).toFixed(1);
+
+  doc.setFontSize(11);
+  doc.text('Resumen del periodo (' + numMeses + ' mes' + (numMeses > 1 ? 'es' : '') + ')', 14, y);
+  y += 7;
+  doc.setFontSize(10);
+  doc.text('Ingresos totales: ' + fmtMoney(totalVentas), 14, y); y += 6;
+  doc.text('Gastos totales: ' + fmtMoney(totalGastos), 14, y); y += 6;
+  doc.text('Utilidad neta: ' + fmtMoney(utilTotal) + (utilTotal >= 0 ? ' (positiva)' : ' (en perdida)'), 14, y); y += 6;
+  doc.text('Margen neto promedio: ' + margenTotal + '%', 14, y); y += 6;
+  doc.text('Score de salud financiera actual: ' + calcScore() + '/100', 14, y); y += 10;
+
+  doc.setFontSize(8.5);
+  doc.setTextColor(120);
+  doc.text('Documento generado automaticamente por Traza a partir de los registros del negocio.', 14, y);
+  doc.text('No sustituye estados financieros dictaminados por un contador publico certificado.', 14, y + 5);
+
+  doc.save('estado_financiero_' + numMeses + 'meses.pdf');
+  showToast('toast-dl', 'PDF generado: estado financiero (' + numMeses + ' mes' + (numMeses > 1 ? 'es' : '') + ')');
+}
+
+
+var toolResponses = {
+  estado: function() {
+    var util = ventas - gastos;
+    var margen = (util / ventas * 100).toFixed(1);
+    var isr = (ventas * 0.02).toFixed(0);
+    var estado = util >= 0 ? '✅ Positivo' : '⚠️ En perdida';
+    return 'Estado de resultados — junio 2026\nIngresos: ' + fmtMoney(ventas) + ' | Gastos: ' + fmtMoney(gastos) + '\nUtilidad neta: ' + fmtMoney(util) + ' ' + estado + '\nMargen: ' + margen + '% | ISR RESICO est.: ' + fmtMoney(isr) + '/mes\n' + (util < 0 ? 'Accion urgente: reducir gastos o aumentar ventas.' : 'Tendencia positiva. Sigue registrando.');
+  },
+  fiscal: function() {
+    var util = ventas - gastos;
+    var resico = (ventas * 0.02).toFixed(0);
+    var activEmp = (util * 0.10).toFixed(0);
+    var anual = ventas * 12;
+    return 'Simulador fiscal — Taqueria El Bosque (junio 2026)\n\nIngresos mensuales: ' + fmtMoney(ventas) + '\nIngresos anuales estimados: ' + fmtMoney(anual) + '\n\n--- Comparativa por Regimen SAT ---\n\n✅ RESICO (626) — TU REGIMEN ACTUAL\nISR mensual: ~' + fmtMoney(resico) + ' (2% sobre ingresos)\nVentaja: tasa minima, tramite simple\nLimite: $3.5M anuales (~$291,000/mes)\nEstas al ' + ((anual/3500000)*100).toFixed(0) + '% del limite anual\n\n⚠️ Actividades Empresariales (612)\nISR estimado: ~' + fmtMoney(activEmp) + '/mes (sobre utilidad)\nVentaja: puedes deducir todos tus gastos reales\nDesventaja: mayor carga contable y tasas hasta 35%\n\n🏢 Persona Moral (601)\nISR: 30% sobre utilidades\nConviene cuando superes $3.5M anuales o necesites socios\n\nRecomendacion: mantente en RESICO. Emite todos tus CFDIs y cuando llegues a $250,000/mes en ventas, agenda revision con contador.';
+  },
+  rentabilidad: function() {
+    return 'Ranking de margen por producto:\n1. Bebidas — 55% ⭐ (sube precio $5, es tu mayor oportunidad)\n2. Tacos al pastor — 41% (volumen + margen, protege precio)\n3. Quesadillas — 28% (aceptable)\n4. Tortas — 22% ⚠️ (nunca apliques descuento aqui)\nAccion: combo tacos+bebida puede subir utilidad un 8% sin cambiar volumen.';
+  },
+  descuento: function() {
+    var m = ((ventas - gastos) / ventas * 100).toFixed(1);
+    return 'Con margen actual de ' + m + '%:\n• Desc. 10%: seguro solo en bebidas (55%) y tacos (41%)\n• Desc. 15%: solo viable en bebidas\n• Tortas: NUNCA descuentos — margen de 22% no lo soporta\nEstrategia: combo tacos+bebida con 8% off. Sube ticket y mantiene margen.';
+  },
+  identidad: function() {
+    var score = calcScore();
+    var util = ventas - gastos;
+    var estado = util >= 0 ? 'Positivo ✅' : 'En perdida ⚠️';
+    return 'Score: ' + score + '/100 | Ventas: ' + fmtMoney(ventas) + ' | Utilidad: ' + fmtMoney(util) + ' (' + estado + ')\nMargen: ' + ((util/ventas)*100).toFixed(1) + '% | Registros: ' + (134+numReg) + ' movimientos\nPara fortalecer tu expediente: adjunta estados de cuenta bancarios y constancia SAT actualizada.';
+  }
+};
+
+var creditoResponses = {
+  alta: function(nombre, monto, tasa, plazo) {
+    return nombre + ' — 80% elegibilidad ✅\nTasa: ' + tasa + ' | Plazo: ' + plazo + ' | Pago est.: ~' + fmtMoney(ventas*0.15) + '/mes\n✔ Tasa mas baja del mercado, respaldo gubernamental\n✘ Proceso lento (15–45 dias), documentacion extensa\nNecesitas: constancia SAT, estados de cuenta 6 meses, reporte Traza.';
+  },
+  media: function(nombre, monto, tasa, plazo) {
+    return nombre + ' — 75% elegibilidad ⚡\nTasa: ' + tasa + ' | Aprobacion: 24–72 hrs | Sin garantia hipotecaria\n✔ Rapido, evalua datos SAT, accesible desde 1 año de operacion\n✘ Tasa mayor que banca tradicional\nMejor opcion si necesitas liquidez HOY.';
+  },
+  'media-baja': function(nombre, monto, tasa, plazo) {
+    return nombre + ' — 50% elegibilidad\nTasa: ' + tasa + ' | CAT: 13.8–14.3% | 0% comision apertura\n✔ CAT mas bajo del sector, montos hasta $17M\n✘ Requiere 2+ años de historial bancario formal\nElegibilidad mejorara con 12 meses mas de registros en Traza.';
+  }
+};
+
+var chatKnowledge = [
+  { keys: ['rentable','rentabilidad','producto','gana','deja'], fn: function() {
+    return 'Top rentabilidad: Bebidas 55% > Tacos al pastor 41% > Quesadillas 28% > Tortas 22%.\nAccion: crea combo tacos+bebida para maximizar margen y ticket promedio.';
+  }},
+  { keys: ['credito','prestamo','financiamiento','banco','dinero','fondeo'], fn: function() {
+    var sc = calcScore();
+    return 'Score actual: ' + sc + '/100. Top 5 creditos PyME en Mexico:\n1. NAFIN: hasta $5M, desde 11% anual — tasa mas baja\n2. Konfio: hasta $6M, ~20% anual, aprobacion 72 hrs — mas accesible HOY\n3. BBVA: hasta $15M, CAT 18.1% — requiere 2+ años antiguedad\n4. Banorte: hasta $17M, CAT 13.8%, 0% apertura — mejor tasa bancaria\n5. Bancomext: exportadores, tasas preferenciales\nVe a la seccion Creditos para ver tu elegibilidad.';
+  }},
+  { keys: ['nafin','nacional financiera','mueve tu pyme'], fn: function() {
+    return 'NAFIN — Mueve tu PyME\nMonto: $100K–$5M | Tasa: desde 11% anual | Plazo: hasta 60 meses\n✔ Tasa mas baja del mercado, respaldo gobierno, capacitacion gratuita\n✘ Proceso lento 15–45 dias, requiere 2+ años de antiguedad\nRequisitos: RFC, buro sin manchas, estados de cuenta 6 meses, declaraciones SAT.';
+  }},
+  { keys: ['bbva','credito simple','credito pyme bbva'], fn: function() {
+    return 'BBVA — Credito Simple PyME\nMonto: $50K–$15M | CAT: 18.1% | Plazo: hasta 60 meses\n✔ Montos altos, respuesta online en 48 hrs\n✘ Requiere ventas anuales min. $5M y 4 años de antiguedad\nHoy tienes elegibilidad parcial; en 12 meses de registros en Traza mejoras tu perfil.';
+  }},
+  { keys: ['banorte','circulo pyme','banorte pyme'], fn: function() {
+    return 'Banorte — Circulo PyME\nMonto: hasta $17M | CAT: 13.8% variable / 14.3% fija | Apertura: 0%\n✔ CAT mas bajo del sector bancario, sin comision de apertura\n✘ Requiere 2+ años de historial bancario formal\nElegibilidad mejora con mas meses de operacion y registros en Traza.';
+  }},
+  { keys: ['konfio','konfío','fintech','credito digital','prestamo rapido'], fn: function() {
+    return 'Konfio — Fintech PyME\nMonto: $50K–$6M | Tasa: ~1.7%/mes (~20% anual) | Aprobacion: 24–72 hrs\n✔ Sin garantia hipotecaria, evalua datos SAT, solo 1 año de operacion\n✘ Tasa mayor que banca tradicional\nEs tu mejor opcion HOY con 6 meses de historial.';
+  }},
+  { keys: ['bancomext','exportar','exportacion','comercio exterior'], fn: function() {
+    return 'Bancomext — Credito exportador\nTasas preferenciales canalizadas por bancos intermediarios\n✔ Especializado en comercio exterior, capacitacion incluida\n✘ Requiere plan de negocios de exportacion y 2+ años de operacion\nNo aplica para tu taqueria hoy, pero si en el futuro exportas salsas o productos.';
+  }},
+  { keys: ['impuesto','fiscal','regimen','sat','isr','iva','cfdi','factura'], fn: function() {
+    return 'Regimenes SAT principales para tu negocio:\n• RESICO (626): hasta $3.5M/año, ISR 1–2.5% — tu regimen ideal ahora, pagas ~' + fmtMoney(ventas*0.02) + '/mes\n• Act. Empresariales (612): sin limite, ISR hasta 35% sobre utilidad, permite mas deducciones\n• Persona Moral (601): ISR 30%, recomendable al superar $3.5M anuales\nMantente en RESICO y emite todos tus CFDIs.';
+  }},
+  { keys: ['resico','regimen simplificado','confianza'], fn: function() {
+    return 'RESICO (clave 626) — tu regimen actual\nISR: 1%–2.5% sobre ingresos cobrados | Limite: $3.5M anuales\n✔ Tasa minima, declaraciones simples, ideal para PyMEs pequeñas\n✘ Sin deducciones personales (gastos medicos, colegiaturas)\nCon ' + fmtMoney(ventas) + '/mes pagas ~' + fmtMoney(ventas*0.02) + ' de ISR. Estas al ' + ((ventas*12/3500000)*100).toFixed(0) + '% del limite anual.';
+  }},
+  { keys: ['actividades empresariales','regimen empresarial','honorarios','profesionista'], fn: function() {
+    return 'Regimen 612 — Actividades Empresariales y Profesionales\nISR: progresivo hasta 35% sobre utilidad (ingresos – deducciones)\n✔ Deduce gastos reales: insumos, renta, nomina, equipo\n✘ Mayor carga contable, declaraciones mensuales + anual\nConviene si tus gastos deducibles reducen significativamente tu base gravable.';
+  }},
+  { keys: ['persona moral','sociedad','sa de cv','sas','regimen general'], fn: function() {
+    return 'Persona Moral — Regimen General (clave 601)\nISR: 30% sobre utilidades | Requiere acta constitutiva ante notario\n✔ Mayor capacidad de deduccion, acceso a creditos mas grandes, socios\n✘ Contador obligatorio, contabilidad electronica, tramites complejos\nEvalua este paso cuando superes $3.5M anuales o necesites capital de socios.';
+  }},
+  { keys: ['plataformas tecnologicas','uber','airbnb','mercado libre','rappi'], fn: function() {
+    return 'Regimen 625 — Plataformas Tecnologicas\nAplica a: Uber, DiDi, Airbnb, Mercado Libre, creadores de contenido\n✔ La plataforma retiene y paga ISR/IVA directamente al SAT\n✘ Solo para ingresos de plataformas digitales; tope $300K para retencion definitiva\nSi en el futuro vendes por Rappi o Mercado Libre, este regimen aplica.';
+  }},
+  { keys: ['arrendamiento','renta inmueble','local propio'], fn: function() {
+    return 'Regimen 606 — Arrendamiento\nAplica si rentas casa, departamento, local o bodega\n✔ Deduccion ciega del 35% sin comprobar gastos, combinable con otros regimenes\n✘ Debes emitir CFDI por cada renta cobrada\nUtil si tienes inmuebles propios que alquilas como ingreso adicional.';
+  }},
+  { keys: ['mejor regimen','que regimen me conviene','cual regimen','cambiar regimen'], fn: function() {
+    return 'Con ' + fmtMoney(ventas*12) + ' anuales estimados:\n✅ RESICO: ISR ~' + fmtMoney(ventas*0.02) + '/mes — RECOMENDADO para ti hoy\n⚠️ Act. Empresariales (612): ISR sobre utilidad, util si tienes muchos gastos deducibles\n🏢 Persona Moral (601): ISR 30%, solo si superas $3.5M o necesitas socios\nMantente en RESICO hasta acercarte a $291,000/mes en ventas.';
+  }},
+  { keys: ['reserva','ahorro','guardar','emergencia','fondo'], fn: function() {
+    var util = ventas - gastos;
+    return 'Meta de reserva: ' + fmtMoney(gastos*3) + ' (3 meses de gastos operativos).\nCon utilidad de ' + fmtMoney(util) + '/mes, puedes llegar en ~' + (util > 0 ? Math.ceil(gastos*3/(util*0.5)) : '—') + ' meses ahorrando el 50% de tu utilidad.\n' + (util <= 0 ? '⚠️ Atención: no hay utilidad disponible para ahorrar. Reduce gastos primero.' : 'Esta reserva tambien mejora tu elegibilidad crediticia.');
+  }},
+  { keys: ['descuento','promo','oferta','rebaja'], fn: function() {
+    return 'Con tu margen de ' + ((ventas-gastos)/ventas*100).toFixed(1) + '%, un descuento del 10% solo es seguro en productos con margen mayor a 30% (tacos y bebidas si, tortas no). Mejor estrategia: combos o lealtad con regalo en la quinta compra, que no reduce margen directo.';
+  }},
+  { keys: ['venta','ingreso','facturacion','mes'], fn: function() {
+    return 'Este mes llevas ' + fmtMoney(ventas) + ' en ventas con una utilidad de ' + fmtMoney(ventas-gastos) + '. Comparado con mayo (' + fmtMoney(44000) + ') creciste un ' + (((ventas-44000)/44000)*100).toFixed(1) + '%. Si mantienes esta tendencia, en 3 meses podrias superar ' + fmtMoney(ventas*1.1) + ' mensuales.';
+  }},
+  { keys: ['score','salud','puntaje','calificacion'], fn: function() {
+    var sc = calcScore();
+    return 'Score: ' + sc + '/100. ' + (sc >= 86 ? 'Excelente ✅' : sc >= 70 ? 'Bueno 🟡' : 'En riesgo ⚠️') + '\nSube registrando ventas constantes y manteniendo margen positivo.\nBaja cuando gastos superan ventas o hay meses sin actividad.\nMeta: 90+ puntos para maxima elegibilidad crediticia.';
+  }},
+  { keys: ['gasto','costo','egreso','gasta'], fn: function() {
+    var pct = ((gastos/ventas)*100).toFixed(1);
+    var alerta = gastos > ventas ? '⚠️ ALERTA: gastos superan ventas. Reduce costos urgente.' : (pct > 70 ? '⚠️ Gastos altos, benchmark ideal es 60–65%.' : '✅ Nivel saludable.');
+    return 'Gastos: ' + fmtMoney(gastos) + '/mes (' + pct + '% de ingresos)\n' + alerta + '\nOportunidad: negocia precios de insumos por volumen para bajar costo variable.';
+  }},
+  { keys: ['crecer','crecimiento','expandir','sucursal','local'], fn: function() {
+    var util = ventas - gastos;
+    return util > 0
+      ? 'Utilidad: ' + fmtMoney(util) + '/mes — base solida para crecer.\nSegunda ubicacion: $80K–$150K de inversion inicial.\nMejor opcion de financiamiento: Konfio (72 hrs) o NAFIN (tasa 11%).\nSigue registrando para fortalecer tu expediente.'
+      : '⚠️ Con perdida actual de ' + fmtMoney(Math.abs(util)) + '/mes, expandirte ahora es riesgoso.\nPrioridad: recuperar margen positivo antes de crecer.';
+  }},
+  { keys: ['buro','historial crediticio','buro de credito'], fn: function() {
+    return 'Buro de Credito — clave para cualquier credito formal.\n✔ Paga puntual, no uses mas del 30% de tu linea, no solicites varios a la vez\n✔ Si no tienes historial, empieza con tarjeta empresarial de bajo limite\nKonfio y NAFIN son mas accesibles si tu buro es nuevo o tiene manchas menores.';
+  }},
+  { keys: ['requisitos','documentos','papeles','expediente'], fn: function() {
+    return 'Documentos base para credito PyME:\n• INE + comprobante domicilio + constancia SAT\n• Estados de cuenta bancarios (6–12 meses)\n• Declaraciones fiscales 2 ejercicios\n• Estados financieros (balance + resultados)\n• Konfio: solo RFC y datos SAT (proceso 100% digital)\nTu reporte Traza complementa el expediente con historial de movimientos.';
+  }}
+];
+
+function getAIResponse(msg) {
+  var lower = msg.toLowerCase();
+  for (var i = 0; i < chatKnowledge.length; i++) {
+    var entry = chatKnowledge[i];
+    for (var j = 0; j < entry.keys.length; j++) {
+      if (lower.indexOf(entry.keys[j]) !== -1) {
+        return entry.fn();
+      }
+    }
+  }
+  var util = ventas - gastos;
+  var sc = calcScore();
+  var signo = util >= 0 ? '' : '⚠️ ';
+  var fallbacks = [
+    signo + 'Ventas: ' + fmtMoney(ventas) + ' | Gastos: ' + fmtMoney(gastos) + ' | Utilidad: ' + fmtMoney(util) + ' | Score: ' + sc + '. Preguntame sobre creditos, impuestos, margen o como crecer.',
+    signo + 'Margen actual: ' + ((util/ventas)*100).toFixed(1) + '% y score ' + sc + '/100. ' + (util < 0 ? 'Atención: tus gastos superan ventas, esto reduce tu score y elegibilidad crediticia.' : 'Sigue registrando para fortalecer tu historial.'),
+    signo + 'Score: ' + sc + '/100, margen: ' + ((util/ventas)*100).toFixed(1) + '%. ' + (util < 0 ? 'Prioridad: reducir gastos o aumentar ventas para recuperar margen positivo.' : 'Fundamentos sanos. Registra mas datos para mejorar tu perfil.')
+  ];
+  return fallbacks[Math.floor(Math.random() * fallbacks.length)];
+}
+
+function typeText(el, text, done) {
+  var i = 0;
+  el.textContent = '';
+  var iv = setInterval(function() {
+    el.textContent += text[i];
+    i++;
+    if (i >= text.length) { clearInterval(iv); if (done) done(); }
+  }, 18);
+}
+
+function sendChat() {
+  var inp = document.getElementById('chat-input');
+  var msg = inp.value.trim();
+  if (!msg) return;
+  inp.value = '';
+  document.getElementById('quick-area').style.display = 'none';
+  var box = document.getElementById('chat-msgs');
+
+  var ub = document.createElement('div');
+  ub.className = 'bubble user-msg';
+  ub.textContent = msg;
+  box.appendChild(ub);
+
+  var tb = document.createElement('div');
+  tb.className = 'bubble typing';
+  tb.textContent = '...';
+  box.appendChild(tb);
+  box.scrollTop = box.scrollHeight;
+
+  setTimeout(function() {
+    var reply = getAIResponse(msg);
+    box.removeChild(tb);
+    var bb = document.createElement('div');
+    bb.className = 'bubble bot';
+    box.appendChild(bb);
+    typeText(bb, reply, function() { box.scrollTop = box.scrollHeight; });
+    box.scrollTop = box.scrollHeight;
+  }, 900 + Math.random() * 600);
+}
+
+function sendQuick(q) {
+  document.getElementById('chat-input').value = q;
+  sendChat();
+}
+
+function openTool(id) {
+  var overlay = document.getElementById('modal-tool');
+  overlay.classList.add('show');
+  var titles = { estado:'Estado de resultados IA', fiscal:'Simulador fiscal IA', rentabilidad:'Rentabilidad por producto IA', descuento:'Calculadora de descuentos IA', identidad:'Mi identidad financiera IA' };
+  document.getElementById('mt-title').textContent = titles[id] || 'Analizando...';
+  document.getElementById('mt-gen').style.display = 'flex';
+  document.getElementById('mt-res').style.display = 'none';
+  setTimeout(function() {
+    var res = toolResponses[id] ? toolResponses[id]() : 'Analisis completado.';
+    document.getElementById('mt-gen').style.display = 'none';
+    var resEl = document.getElementById('mt-res');
+    var textEl = document.getElementById('mt-text');
+    resEl.style.display = 'block';
+    typeText(textEl, res);
+  }, 1200 + Math.random() * 800);
+}
+
+function openCredito(nombre, monto, tasa, plazo, pct, nivel) {
+  var overlay = document.getElementById('modal-cred');
+  overlay.classList.add('show');
+  document.getElementById('mc-title').textContent = nombre;
+  document.getElementById('mc-gen').style.display = 'flex';
+  document.getElementById('mc-res').style.display = 'none';
+  setTimeout(function() {
+    var fn = creditoResponses[nivel] || creditoResponses['media'];
+    var res = fn(nombre, monto, tasa, plazo);
+    document.getElementById('mc-gen').style.display = 'none';
+    var resEl = document.getElementById('mc-res');
+    var textEl = document.getElementById('mc-text');
+    resEl.style.display = 'block';
+    typeText(textEl, res);
+  }, 1000 + Math.random() * 700);
+}
+
+function togglePriv(el) {
+  el.classList.toggle('on');
+  el.classList.toggle('off');
+  el.style.justifyContent = el.classList.contains('on') ? 'flex-end' : 'flex-start';
+}
+
+function downloadReport(periodo) {
+  var meses = periodo === '3 meses' ? 3 : 12;
+  showToast('toast-dl', 'Generando expediente ' + periodo + ' con IA...');
+  setTimeout(function() {
+    generarEstadoPDF(meses);
+  }, 900);
+}
+
+// ---- FORMALÍZATE ----
+function fTab(el, id) {
+  document.querySelectorAll('#ftabs .tag').forEach(function(t){ t.classList.remove('active'); });
+  el.classList.add('active');
+  ['calc','regimenes','ventajas','pasos','ruta'].forEach(function(k){
+    document.getElementById('ft-' + k).style.display = (k === id) ? 'block' : 'none';
+  });
+  if (id === 'ruta') renderRuta();
+}
+
+function fmtM(n) { return '$' + Math.round(n).toLocaleString('es-MX'); }
+
+/* ===== Ruta paso a paso (checklist) ===== */
+var rutaPasos = [
+  { titulo: 'Obtén tu RFC', detalle: 'Trámite gratuito en el SAT con tu CURP, identificación y comprobante de domicilio.' },
+  { titulo: 'Tramita e.firma', detalle: 'Tu firma electrónica te permite declarar, facturar y hacer trámites del SAT en línea.' },
+  { titulo: 'Activa tu régimen', detalle: 'Elige RESICO u otro régimen según tus ingresos (usa el simulador de esta pantalla).' },
+  { titulo: 'Comienza a facturar', detalle: 'Usa el facturador gratuito del SAT (Mis Cuentas) para emitir tus primeros CFDIs.' },
+  { titulo: 'Presenta declaraciones', detalle: 'Declara mensualmente (RESICO: día 17 de cada mes). Traza ya tiene tus ingresos y gastos listos.' },
+  { titulo: 'Construye historial financiero', detalle: 'Cada declaración y factura mejora tu elegibilidad para créditos como NAFIN, Konfio, BBVA y Banorte.' }
+];
+var rutaEstado = [false, false, false, false, false, false];
+
+function toggleRutaPaso(i) {
+  rutaEstado[i] = !rutaEstado[i];
+  renderRuta();
+}
+
+function renderRuta() {
+  var completados = rutaEstado.filter(Boolean).length;
+
+  var cajas = document.getElementById('ruta-cajas');
+  if (cajas) {
+    cajas.innerHTML = '';
+    rutaEstado.forEach(function(done) {
+      var b = document.createElement('div');
+      b.style.cssText = 'width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;' +
+        (done ? 'background:#fff;color:var(--teal);' : 'background:rgba(255,255,255,0.25);color:#fff;');
+      b.textContent = done ? '✓' : '';
+      cajas.appendChild(b);
+    });
+  }
+
+  var txt = document.getElementById('ruta-progreso-txt');
+  if (txt) txt.textContent = completados + ' de 6 pasos completados';
+
+  var lista = document.getElementById('ruta-lista');
+  if (lista) {
+    lista.innerHTML = '';
+    rutaPasos.forEach(function(p, i) {
+      var done = rutaEstado[i];
+      var row = document.createElement('div');
+      row.style.cssText = 'display:flex;gap:10px;align-items:flex-start;background:' + (done ? '#E1F5EE' : 'var(--surface2)') + ';border-radius:10px;padding:11px;border:0.5px solid ' + (done ? '#1D9E75' : 'var(--border)') + ';cursor:pointer;';
+      row.onclick = function() { toggleRutaPaso(i); };
+      row.innerHTML =
+        '<div style="width:22px;height:22px;border-radius:6px;border:1.5px solid ' + (done ? '#1D9E75' : 'var(--border2)') + ';background:' + (done ? '#1D9E75' : 'transparent') + ';display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;color:#fff;font-size:13px;font-weight:700;">' + (done ? '✓' : '') + '</div>' +
+        '<div style="flex:1;">' +
+          '<p style="font-size:13px;font-weight:500;color:' + (done ? '#0F6E56' : 'var(--text-primary)') + ';' + (done ? 'text-decoration:line-through;opacity:0.85;' : '') + '">Paso ' + (i + 1) + ' · ' + p.titulo + '</p>' +
+          '<p style="font-size:11px;color:' + (done ? '#0F6E56' : 'var(--text-secondary)') + ';margin-top:2px;line-height:1.45;">' + p.detalle + '</p>' +
+        '</div>';
+      lista.appendChild(row);
+    });
+  }
+
+  var final = document.getElementById('ruta-final');
+  if (final) final.style.display = (completados === 6) ? 'block' : 'none';
+}
+
+/* ===== Autocálculo de la calculadora de impuestos con datos reales de Traza ===== */
+function autofillFormal() {
+  var totV = 0, totG = 0;
+  monthlyHistory.forEach(function(m) { totV += m.ventas; totG += m.gastos; });
+  document.getElementById('f-ingresos').value = Math.round(totV);
+  document.getElementById('f-gastos').value = Math.round(totG);
+  calcFormal();
+}
+
+function calcFormal(manual) {
+  var ing = parseFloat(document.getElementById('f-ingresos').value) || 0;
+  var gas = parseFloat(document.getElementById('f-gastos').value) || 0;
+  var act = document.getElementById('f-actividad').value;
+
+  if (ing <= 0) {
+    document.getElementById('f-resultado').style.display = 'none';
+    document.getElementById('f-placeholder').style.display = 'block';
+    return;
+  }
+  document.getElementById('f-resultado').style.display = 'block';
+  document.getElementById('f-placeholder').style.display = 'none';
+
+  // Tasas ISR RESICO 2025 (simplificado por tramos)
+  var tasaResico = ing <= 300000 ? 0.01 : ing <= 600000 ? 0.011 : ing <= 1000000 ? 0.013 : ing <= 2000000 ? 0.016 : ing <= 3500000 ? 0.02 : 0.025;
+  var isrResico = ing * tasaResico;
+  var ivaResico = ing * 0.16; // simplificado, sin acreditable
+
+  // Actividades Empresariales PF (base gravable = ingresos - gastos, tasa progresiva aprox)
+  var base = Math.max(0, ing - gas);
+  var tasaAE = base <= 100000 ? 0.10 : base <= 200000 ? 0.16 : base <= 500000 ? 0.21 : base <= 1000000 ? 0.28 : 0.32;
+  var isrAE = base * tasaAE;
+  var ivaAE = (ing - gas) * 0.16;
+
+  // Régimen General PM (S.A. de C.V.)
+  var baseGral = Math.max(0, ing - gas);
+  var isrGral = baseGral * 0.30;
+  var ivaGral = (ing - gas) * 0.16;
+
+  var regimenes = [
+    { nombre: 'RESICO (P. Física)', isr: isrResico, iva: ivaResico, color: '#1D9E75', bg: '#E1F5EE', tc:'#0F6E56', limite: ing <= 3500000, tag: 'Más simple' },
+    { nombre: 'Act. Empresariales (P. Física)', isr: isrAE, iva: ivaAE, color: '#EF9F27', bg: '#FAEEDA', tc:'#633806', limite: true, tag: 'Sin límite de ingresos' },
+    { nombre: 'Persona Moral (S.A. de C.V.)', isr: isrGral, iva: ivaGral, color: '#534AB7', bg: '#EEEDFE', tc:'#3C3489', limite: true, tag: 'Mayor acceso a crédito' }
+  ];
+
+  var container = document.getElementById('f-cards');
+  container.innerHTML = '';
+  var mejorIdx = 0, mejorTotal = Infinity;
+  regimenes.forEach(function(r, i) {
+    var total = r.isr + (r.iva > 0 ? r.iva * 0.1 : 0); // simplificado
+    if (r.limite && r.isr < mejorTotal) { mejorTotal = r.isr; mejorIdx = i; }
+  });
+
+  regimenes.forEach(function(r, i) {
+    if (!r.limite) return;
+    var isMejor = (i === mejorIdx);
+    var div = document.createElement('div');
+    div.style.cssText = 'background:' + r.bg + ';border-radius:10px;padding:12px;border-left:3px solid ' + r.color + ';' + (isMejor ? 'box-shadow:0 0 0 2px ' + r.color + ';' : '');
+    div.innerHTML =
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">' +
+        '<p style="font-size:12px;font-weight:600;color:' + r.tc + ';">' + r.nombre + '</p>' +
+        (isMejor ? '<span style="font-size:10px;background:' + r.color + ';color:#fff;padding:2px 8px;border-radius:20px;font-weight:600;">✓ Recomendado</span>' : '<span style="font-size:10px;color:' + r.tc + ';opacity:0.7;">' + r.tag + '</span>') +
+      '</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">' +
+        '<div style="background:rgba(255,255,255,0.6);border-radius:6px;padding:7px;text-align:center;">' +
+          '<p style="font-size:10px;color:' + r.tc + ';">ISR estimado / año</p>' +
+          '<p style="font-size:14px;font-weight:700;color:' + r.color + ';">' + fmtM(r.isr) + '</p>' +
+        '</div>' +
+        '<div style="background:rgba(255,255,255,0.6);border-radius:6px;padding:7px;text-align:center;">' +
+          '<p style="font-size:10px;color:' + r.tc + ';">ISR / mes estimado</p>' +
+          '<p style="font-size:14px;font-weight:700;color:' + r.color + ';">' + fmtM(r.isr / 12) + '</p>' +
+        '</div>' +
+      '</div>';
+    container.appendChild(div);
+  });
+
+  // Recomendación
+  var recTexts = {
+    alimentos: ing <= 3500000 ? 'Tu taquería califica perfectamente para RESICO. Pagarás solo ' + (tasaResico*100).toFixed(1) + '% de ISR sobre tus ingresos sin necesidad de comprobar gastos. Es el régimen más sencillo para negocios de alimentos.' : 'Tus ingresos superan el límite de RESICO. Te conviene constituir una S.A. de C.V. para deducir gastos y acceder a financiamiento institucional.',
+    comercio: ing <= 3500000 ? 'Para comercio al menudeo, RESICO es ideal: declaración mensual en minutos, sin contabilidad compleja y con la tasa más baja.' : 'Con ingresos superiores a $3.5M, evalúa Persona Moral para mejor manejo fiscal y acceso a líneas de crédito empresariales.',
+    servicios: 'Para servicios profesionales con gastos deducibles importantes (' + fmtM(gas) + '), compara RESICO vs Actividades Empresariales. Si tus gastos superan el 40% de ingresos, Actividades Empresariales puede ser mejor.',
+    manufactura: 'La manufactura tiene gastos altos en materia prima e insumos. Con ' + fmtM(gas) + ' en gastos, Actividades Empresariales o Persona Moral te permite deducirlos y reducir tu base gravable.',
+    transporte: ing <= 3500000 ? 'El transporte califica a RESICO. Además, existen facilidades fiscales para transportistas — puedes deducir gasolina, mantenimiento y depreciación del vehículo en Actividades Empresariales.' : 'Considera Persona Moral para mayor acceso a financiamiento de unidades y flotillas.'
+  };
+  document.getElementById('f-recomend').textContent = recTexts[act] || recTexts['alimentos'];
+
+  // Tip crédito
+  var creditTips = [
+    'Con RFC activo y al menos 6 declaraciones al día, tu elegibilidad en Traza subiría a 85%+ para NAFIN y podrías aplicar a créditos desde $100,000 a tasa preferencial del 11% anual.',
+    'Formalizado, puedes presentar tus declaraciones del SAT como respaldo financiero. Los bancos las aceptan como sustituto de estados financieros auditados para PyMEs.',
+    'El acceso a CLIP, Mercado Pago y terminales bancarias requiere RFC. Cada transacción digital construye historial crediticio automáticamente.'
+  ];
+  var tipIdx = Math.floor(ing / 500000) % creditTips.length;
+  document.getElementById('f-credito-tip').textContent = creditTips[tipIdx];
+}
+
+autofillFormal();
+renderRuta();
+goTo('home');
+</script>
